@@ -1,10 +1,25 @@
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace AiMarketing.Blazor.Data
 {
-    // Add profile data for application users by adding properties to the ApplicationUser class
+    
     public class ApplicationUser : IdentityUser
     {
+        [Required]
+        public string StripeCustomerId { get; set; } = "";
+        [Required]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; } = "";
+
+        [NotMapped]
+        [Display(Name = "Full Name")]
+        public string FullName { get { return $"{FirstName} {LastName}"; } }
     }
 
 }

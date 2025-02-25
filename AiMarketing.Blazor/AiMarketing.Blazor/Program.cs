@@ -2,6 +2,7 @@ using AiMarketing.Blazor.Client.Pages;
 using AiMarketing.Blazor.Components;
 using AiMarketing.Blazor.Components.Account;
 using AiMarketing.Blazor.Data;
+using AiMarketing.Blazor.Services.PostService;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 var app = builder.Build();
 
