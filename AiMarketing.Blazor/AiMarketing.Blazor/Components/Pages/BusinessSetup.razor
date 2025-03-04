@@ -1,0 +1,123 @@
+﻿@page "/business-setup"
+@inject UserManager<ApplicationUser> _userManager
+@inject IBusinessProfileService _businessProfileService
+@inject NavigationManager _navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+<h3>Set Up Your Business Profile</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else 
+{
+    <EditForm Model="businessProfile" OnValidSubmit="SaveBusinessProfile">
+        <DataAnnotationsValidator />
+        <ValidationSummary></ValidationSummary>
+        <InputText @bind-Value="businessProfile.UserId" type="hidden" />
+        <div>
+            <label>Business Name</label>
+            <InputText @bind-Value="businessProfile.BusinessName" class="form-control" required />
+        </div>
+        <div>
+            <label>Industry</label>
+            <InputText @bind-Value="businessProfile.Industry" class="form-control" required />
+        </div>
+        <div>
+            <label>Services Offered</label>
+            <InputText @bind-Value="businessProfile.Services" class="form-control" required />
+        </div>
+        <div>
+            <label>Target Audience</label>
+            <InputText @bind-Value="businessProfile.TargetAudience" class="form-control" required />
+        </div>
+        <div>
+            <label>Brand Voices (Select Multiple)</label>
+            @foreach(var voice in availableBrandVoices)
+            {
+                <div>
+                    <input type="checkbox" value="@voice" @onchange="(e) => ToggleBrandVoice(voice, (bool)((ChangeEventArgs)e).Value!)" />
+                    @voice
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Profile</button>
+    </EditForm>
+    <!-- Debugging button -->
+    <button @onclick="SaveBusinessProfile">Test Save</button>
+}
+
+@code {
+    private bool isLoading = true;
+    private BusinessProfile businessProfile = new();
+    private ApplicationUser? currentUser;
+    private readonly List<string> availableBrandVoices = Enum.GetNames(typeof(BrandVoices)).ToList();
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userPrincipal = authState.User;
+
+        if (userPrincipal.Identity is { IsAuthenticated: true })
+        {
+            currentUser = await _userManager.GetUserAsync(userPrincipal);
+        }
+
+        if(currentUser is not null) 
+        {
+            var existingProfile = await _businessProfileService.GetProfileByUserIdAsync(currentUser.Id);
+            if(existingProfile is not null)
+            {
+                businessProfile = existingProfile;
+                businessProfile.UserId = currentUser.Id;
+            }
+            else 
+            {
+                businessProfile.UserId = currentUser.Id;
+            }
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task SaveBusinessProfile()
+    {
+        if(currentUser is not null)
+        {
+            businessProfile.UserId = currentUser.Id;
+            await _businessProfileService.SaveProfileAsync(businessProfile);
+
+            //Exclude navigation property of businessProfile
+            var profileDTO = new BusinessProfileDTO
+            {
+                BusinessName = businessProfile.BusinessName,
+                Industry = businessProfile.Industry,
+                Services = businessProfile.Services,
+                TargetAudience = businessProfile.TargetAudience,
+                BrandVoices = businessProfile.BrandVoices.Select(bv => bv.Voice).ToList()
+            };
+
+            //Serialized and store business profile in session storage
+            var jsonData = JsonSerializer.Serialize(profileDTO);
+            await JS.InvokeVoidAsync("sessionStorage.setItem", "businessProfile", jsonData);
+
+            _navigation.NavigateTo("/generate-posts");
+        }
+    }
+
+    private void ToggleBrandVoice(string voice, bool isChecked)
+    {
+        if(isChecked)
+        {
+            if (!businessProfile.BrandVoices.Any(bv => bv.Voice == voice))
+                businessProfile.BrandVoices.Add(new BrandVoice { Voice = voice });
+        }
+        else
+        {
+            businessProfile.BrandVoices.RemoveAll(bv => bv.Voice == voice);
+        }
+    }
+
+}

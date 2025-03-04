@@ -177,11 +177,10 @@ namespace AiMarketing.Blazor.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false),
-                    BusinessName = table.Column<string>(type: "longtext", nullable: false),
+                    BusinessName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     Industry = table.Column<string>(type: "longtext", nullable: false),
                     Services = table.Column<string>(type: "longtext", nullable: false),
-                    TargetAudiences = table.Column<string>(type: "longtext", nullable: false),
-                    BrandVoice = table.Column<string>(type: "longtext", nullable: false)
+                    TargetAudience = table.Column<string>(type: "longtext", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -213,6 +212,27 @@ namespace AiMarketing.Blazor.Data.Migrations
                         name: "FK_Posts_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "BrandVoices",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    Voice = table.Column<string>(type: "longtext", nullable: false),
+                    BusinessProfileId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BrandVoices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BrandVoices_BusinessProfiles_BusinessProfileId",
+                        column: x => x.BusinessProfileId,
+                        principalTable: "BusinessProfiles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -256,6 +276,11 @@ namespace AiMarketing.Blazor.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_BrandVoices_BusinessProfileId",
+                table: "BrandVoices",
+                column: "BusinessProfileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_BusinessProfiles_UserId",
                 table: "BusinessProfiles",
                 column: "UserId",
@@ -286,13 +311,16 @@ namespace AiMarketing.Blazor.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "BusinessProfiles");
+                name: "BrandVoices");
 
             migrationBuilder.DropTable(
                 name: "Posts");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "BusinessProfiles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

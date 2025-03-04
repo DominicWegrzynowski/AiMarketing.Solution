@@ -95,19 +95,36 @@ namespace AiMarketing.Blazor.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("AiMarketing.Blazor.Models.BrandVoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("BusinessProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Voice")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessProfileId");
+
+                    b.ToTable("BrandVoices");
+                });
+
             modelBuilder.Entity("AiMarketing.Blazor.Models.BusinessProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("BrandVoice")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("BusinessName")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Industry")
                         .IsRequired()
@@ -117,7 +134,7 @@ namespace AiMarketing.Blazor.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("TargetAudiences")
+                    b.Property<string>("TargetAudience")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -288,6 +305,17 @@ namespace AiMarketing.Blazor.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AiMarketing.Blazor.Models.BrandVoice", b =>
+                {
+                    b.HasOne("AiMarketing.Blazor.Models.BusinessProfile", "BusinessProfile")
+                        .WithMany("BrandVoices")
+                        .HasForeignKey("BusinessProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BusinessProfile");
+                });
+
             modelBuilder.Entity("AiMarketing.Blazor.Models.BusinessProfile", b =>
                 {
                     b.HasOne("AiMarketing.Blazor.Data.ApplicationUser", "User")
@@ -359,6 +387,11 @@ namespace AiMarketing.Blazor.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("AiMarketing.Blazor.Models.BusinessProfile", b =>
+                {
+                    b.Navigation("BrandVoices");
                 });
 #pragma warning restore 612, 618
         }

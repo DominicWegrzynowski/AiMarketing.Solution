@@ -1,6 +1,10 @@
-using AiMarketing.Blazor.Models;
+﻿using AiMarketing.Blazor.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Reflection.Emit;
+using System.Text.Json;
 
 namespace AiMarketing.Blazor.Data
 {
@@ -8,7 +12,7 @@ namespace AiMarketing.Blazor.Data
     {
         public DbSet<Post> Posts { get; set; }
         public DbSet<BusinessProfile> BusinessProfiles { get; set; }
-
+        public DbSet<BrandVoice> BrandVoices { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

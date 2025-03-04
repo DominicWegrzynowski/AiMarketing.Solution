@@ -2,6 +2,8 @@ using AiMarketing.Blazor.Client.Pages;
 using AiMarketing.Blazor.Components;
 using AiMarketing.Blazor.Components.Account;
 using AiMarketing.Blazor.Data;
+using AiMarketing.Blazor.Services.BusinessProfileService;
+using AiMarketing.Blazor.Services.OpenAiService;
 using AiMarketing.Blazor.Services.PostService;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -40,7 +42,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<IPostService, PostService>();
-
+builder.Services.AddScoped<IBusinessProfileService, BusinessProfileService>();
+var openAiApiKey = builder.Configuration["OpenAI:ApiKey"];
+builder.Services.AddSingleton(new OpenAiService(openAiApiKey));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

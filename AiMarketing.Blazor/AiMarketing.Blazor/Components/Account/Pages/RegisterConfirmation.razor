@@ -54,6 +54,11 @@ else
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             statusMessage = "Error finding user for unspecified email";
         }
+        else if(await UserManager.IsEmailConfirmedAsync(user))
+        {
+            // Redirect to business setup if email is confirmed
+            NavigationManager.NavigateTo("/business-setup");
+        }
         else if (EmailSender is IdentityNoOpEmailSender)
         {
             // Once you add a real email sender, you should remove this code that lets you confirm the account

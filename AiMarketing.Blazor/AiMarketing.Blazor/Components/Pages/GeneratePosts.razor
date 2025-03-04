@@ -1,0 +1,73 @@
+﻿@page "/generate-posts"
+@inject IPostService _postService
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject OpenAiService _openAiService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<h3>Generate AI-Powered Social Media Posts</h3>
+
+
+<button @onclick="async => GeneratePostAsync()">Generate Post</button>
+<p>@debugMessage</p>
+@if(generatedPosts.Any())
+{
+    <p><strong>Generated Post:</strong></p>
+    @foreach(var post in generatedPosts)
+    {
+        <p>@post</p>
+    }
+}
+
+@code {
+    private string businessType = "General";
+    private string debugMessage = "";
+    private BusinessProfileDTO? businessProfile;
+    private List<string> generatedPosts = new List<string>();
+    private bool isJSInteropReady = false;
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     //Retrieve the business profile from session storage
+    //     var jsonData = await JS.InvokeAsync<string>("sessionStorage.getItem", "businessProfile");
+
+    //     if (!string.IsNullOrEmpty(jsonData)) 
+    //     {
+    //         businessProfile = JsonSerializer.Deserialize<BusinessProfile>(jsonData);
+    //     }
+    // }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            var jsonData = await JS.InvokeAsync<string>("sessionStorage.getItem", "businessProfile");
+
+            if(!string.IsNullOrEmpty(jsonData))
+            {
+                businessProfile = JsonSerializer.Deserialize<BusinessProfileDTO>(jsonData);
+                isJSInteropReady = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task GeneratePostAsync()
+    {
+        if(businessProfile is not null)
+        {
+            generatedPosts.Clear();
+
+            var posts = await _openAiService.GenerateMarketingPostsAsync(
+                businessProfile.BusinessName,
+                businessProfile.Industry,
+                businessProfile.BrandVoices.Select(v => new BrandVoice { Voice = v}).ToList(),
+                5
+            );
+
+            generatedPosts.AddRange(posts);
+            StateHasChanged();
+        }
+    }
+}

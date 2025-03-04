@@ -10,19 +10,21 @@ namespace AiMarketing.Blazor.Models
         [Key]
         public int Id { get; set; }
         [Required]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = "";
         [Required]
-        public string BusinessName { get; set; }
+        [StringLength(100)]
+        public string BusinessName { get; set; } = "";
         [Required]
-        public string Industry { get; set; }
+        public string Industry { get; set; } = "";
         [Required]
-        public string Services { get; set; }
+        public string Services { get; set; } = "";
         [Required]
-        public string TargetAudiences { get; set; }
+        public string TargetAudience { get; set; } = "";
         [Required]
-        public string BrandVoice { get; set; }
+        //One-to-many relationship
+        public List<BrandVoice> BrandVoices { get; set; } = new List<BrandVoice>();
         [Required]
         [ForeignKey("UserId")]
-        public ApplicationUser User { get; set; }
+        public ApplicationUser User { get; set; } = new ApplicationUser();
     }
 }
