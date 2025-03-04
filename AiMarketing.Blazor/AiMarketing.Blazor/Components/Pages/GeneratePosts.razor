@@ -21,22 +21,22 @@
 }
 
 @code {
-    private string businessType = "General";
     private string debugMessage = "";
     private BusinessProfileDTO? businessProfile;
     private List<string> generatedPosts = new List<string>();
     private bool isJSInteropReady = false;
+    private ApplicationUser? currentUser;
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     //Retrieve the business profile from session storage
-    //     var jsonData = await JS.InvokeAsync<string>("sessionStorage.getItem", "businessProfile");
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userPrincipal = authState.User;
 
-    //     if (!string.IsNullOrEmpty(jsonData)) 
-    //     {
-    //         businessProfile = JsonSerializer.Deserialize<BusinessProfile>(jsonData);
-    //     }
-    // }
+        if (userPrincipal.Identity is { IsAuthenticated: true })
+        {
+            currentUser = await _userManager.GetUserAsync(userPrincipal);
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -67,6 +67,9 @@
             );
 
             generatedPosts.AddRange(posts);
+
+            await _postService.AddPostsAsync(posts, currentUser!.Id);
+
             StateHasChanged();
         }
     }

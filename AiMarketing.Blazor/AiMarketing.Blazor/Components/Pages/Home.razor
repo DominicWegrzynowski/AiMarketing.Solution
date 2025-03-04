@@ -1,7 +1,51 @@
 ﻿@page "/"
-
+@inject IPostService _postService
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode InteractiveServer
 <PageTitle>Home</PageTitle>
+@if(currentUser is not null)
+{
+    <h1>Hello @currentUser.FirstName ! Welcome Back.</h1>
+    <h2>Here are your posts:</h2>
+}
+else 
+{
+    <h1> Welcome to AiMarketer</h1>
+}
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+
+
+@if (generatedPosts is not null && generatedPosts.Any())
+{
+    <p><strong>Generated Post:</strong></p>
+    @foreach (var post in generatedPosts!)
+    {
+        <p>@post</p>
+    }
+}
+
+@code {
+    private ApplicationUser? currentUser;
+    private List<string>? generatedPosts = new List<string>();
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userPrincipal = authState.User;
+
+        if (userPrincipal.Identity is { IsAuthenticated: true })
+        {
+            currentUser = await _userManager.GetUserAsync(userPrincipal);
+        }
+
+        if(currentUser is not null)
+        {
+            List<Post> listOfPosts =  await _postService.GetUserPosts(currentUser!.Id);
+            foreach (var post in listOfPosts)
+            {
+                generatedPosts!.Add(post.Content);
+            }
+        }
+    }
+}

@@ -10,7 +10,7 @@ namespace AiMarketing.Blazor.Models
         [Required]
         public string UserId { get; set; }
         public string Content { get; set; }
-        public DateTime ScheduledTime { get; set; }
+        public DateTime? ScheduledTime { get; set; }
         public bool IsPosted { get; set; }
 
         public ApplicationUser User { get; set; }

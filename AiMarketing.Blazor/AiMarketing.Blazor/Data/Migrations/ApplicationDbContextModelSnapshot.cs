@@ -163,7 +163,7 @@ namespace AiMarketing.Blazor.Data.Migrations
                     b.Property<bool>("IsPosted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime>("ScheduledTime")
+                    b.Property<DateTime?>("ScheduledTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")

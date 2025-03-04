@@ -2,6 +2,8 @@
 using AiMarketing.Blazor.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Bcpg;
 
 namespace AiMarketing.Blazor.Services.PostService
 {
@@ -16,20 +18,25 @@ namespace AiMarketing.Blazor.Services.PostService
             _context = context;
         }
 
-        public async Task<Post> GeneratePostAsync(string userId, string businessType)
+        public async Task AddPostsAsync(List<string>? postContents, string userId)
         {
-            var postText = GetTemplateForBusinessType(businessType);
-            var post = new Post
+            try
             {
-                UserId = userId,
-                Content = postText,
-                ScheduledTime = DateTime.UtcNow.AddDays(1),
-                IsPosted = false
-            };
+                var posts = postContents!.Select(content => new Post
+                {
+                    UserId = userId,
+                    Content = content,
+                    ScheduledTime = null,
+                    IsPosted = false,
+                }).ToList();
 
-            _context.Posts.Add(post);
-            await _context.SaveChangesAsync();
-            return post;
+                await _context.Posts.AddRangeAsync(posts);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            { 
+                throw;
+            }
 
         }
 
@@ -38,19 +45,18 @@ namespace AiMarketing.Blazor.Services.PostService
             throw new NotImplementedException();
         }
 
-        public Task<Post> GetUserPosts(string userId)
+        public async Task<List<Post>> GetUserPosts(string userId)
         {
-            throw new NotImplementedException();
-        }
-        //Later swap out for AI-Generated content using OpenAI API
-        private string GetTemplateForBusinessType(string businessType) 
-        {
-            return businessType switch
+            try
             {
-            "Coffee Shop" => "☕️ Good morning!Start your day with our fresh brew. Visit us today! #CoffeeTime",
-            "Fitness Coach" => "💪 Stay strong! Here's your daily motivation: Keep pushing forward! #FitnessGoals",
-            _ => "📢 Stay connected with our latest updates. Follow us for more! #BusinessGrowth"
-            };
+                var posts = await _context.Posts.Where(p => p.UserId == userId).ToListAsync();
+                return posts;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
