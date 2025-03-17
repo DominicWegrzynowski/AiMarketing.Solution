@@ -15,7 +15,10 @@ namespace AiMarketing.Blazor.Services.BusinessProfileService
 
         public async Task<BusinessProfile> GetProfileByUserIdAsync(string userId)
         {
-            var profile = await _context.BusinessProfiles.FirstOrDefaultAsync(bp => bp.UserId == userId);
+            var profile = await _context.BusinessProfiles
+                                        .Include(bp => bp.BrandVoices)
+                                        .FirstOrDefaultAsync(bp => bp.UserId == userId);
+                            
 
             if(profile is null)
             {
@@ -32,23 +35,40 @@ namespace AiMarketing.Blazor.Services.BusinessProfileService
             try
             {
                 var existingProfile = await _context.BusinessProfiles
-                                                        .FirstOrDefaultAsync(bp => bp.UserId == profile.UserId);
+                                        .Include(bp => bp.BrandVoices)
+                                        .FirstOrDefaultAsync(bp => bp.UserId == profile.UserId);
 
-                if (existingProfile is null)
+                if (existingProfile is null) 
                 {
-                    _context.BusinessProfiles.Add(profile);
+                    profile.UserId = profile.UserId ?? throw new ArgumentException("UserId is required.");
+
+                    await _context.BusinessProfiles.AddAsync(profile);
                 }
                 else
                 {
+                    //Update the existing profile with new values 
                     existingProfile.BusinessName = profile.BusinessName;
                     existingProfile.Industry = profile.Industry;
                     existingProfile.Services = profile.Services;
                     existingProfile.TargetAudience = profile.TargetAudience;
-                    existingProfile.BrandVoices = profile.BrandVoices;
 
-                    // Sync brand voices as string values
-                    _context.BrandVoices.RemoveRange(existingProfile.BrandVoices);
-                    existingProfile.BrandVoices = profile.BrandVoices;
+                    //Clear out old BrandVoices if necessary
+                    var brandVoicesToRemove = existingProfile.BrandVoices 
+                                                             .Where(bv => !profile.BrandVoices
+                                                                .Any(newBv => newBv.Voice == bv.Voice))
+                                                             .ToList();
+
+                    // Remove BrandVoices that are no longer selected
+                    _context.BrandVoices.RemoveRange(brandVoicesToRemove);
+
+                    // Add the new BrandVoices (if any)
+                    foreach(var brandVoice in profile.BrandVoices)
+                    {
+                        if(!existingProfile.BrandVoices.Any(bv => bv.Voice == brandVoice.Voice))
+                        {
+                            existingProfile.BrandVoices.Add(brandVoice);
+                        }
+                    }
                 }
 
                 await _context.SaveChangesAsync();

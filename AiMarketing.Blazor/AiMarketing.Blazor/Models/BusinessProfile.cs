@@ -10,6 +10,7 @@ namespace AiMarketing.Blazor.Models
         [Key]
         public int Id { get; set; }
         [Required]
+        [ForeignKey("UserId")]
         public string UserId { get; set; } = "";
         [Required]
         [StringLength(100)]
@@ -23,8 +24,5 @@ namespace AiMarketing.Blazor.Models
         [Required]
         //One-to-many relationship
         public List<BrandVoice> BrandVoices { get; set; } = new List<BrandVoice>();
-        [Required]
-        [ForeignKey("UserId")]
-        public ApplicationUser User { get; set; } = new ApplicationUser();
     }
 }

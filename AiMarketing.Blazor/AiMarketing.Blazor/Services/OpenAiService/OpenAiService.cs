@@ -22,18 +22,8 @@ namespace AiMarketing.Blazor.Services.OpenAiService
         {
 
             // Dynamically set how long the post can be based on numberOfPosts
-            var maxTokens = 0;
-
-            if (numberOfPosts == 5)
-                maxTokens = 300;
-            else if (numberOfPosts == 30)
-                maxTokens = 1800;
-            else if (numberOfPosts == 60)
-                maxTokens = 3600;
-            else
-                throw new ArgumentException("Invalid number of posts. Allowed values are 5, 30, or 60.");
-            
-
+            var maxTokens = 3000;
+           
             string brandVoiceString = brandVoices != null && brandVoices.Any()
                                     ? string.Join(", ", brandVoices.Select(bv => bv.Voice))
                                     : "a neutral and engaging tone";

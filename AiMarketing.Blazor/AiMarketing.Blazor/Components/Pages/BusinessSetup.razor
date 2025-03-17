@@ -1,10 +1,12 @@
 ﻿@page "/business-setup"
+@using Microsoft.AspNetCore.Authorization
 @inject UserManager<ApplicationUser> _userManager
 @inject IBusinessProfileService _businessProfileService
 @inject NavigationManager _navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 @rendermode InteractiveServer
+@attribute [Authorize]
 <h3>Set Up Your Business Profile</h3>
 
 @if (isLoading)
@@ -38,7 +40,10 @@ else
             @foreach(var voice in availableBrandVoices)
             {
                 <div>
-                    <input type="checkbox" value="@voice" @onchange="(e) => ToggleBrandVoice(voice, (bool)((ChangeEventArgs)e).Value!)" />
+                    <input type="checkbox" 
+                           checked="@(IsBrandVoiceSelected(voice))"  
+                           value="@voice" 
+                           @onchange="(e) => ToggleBrandVoice(voice, (bool)((ChangeEventArgs)e).Value!)" />
                     @voice
                 </div>
             }
@@ -46,8 +51,6 @@ else
 
         <button type="submit" class="btn btn-primary">Save Profile</button>
     </EditForm>
-    <!-- Debugging button -->
-    <button @onclick="SaveBusinessProfile">Test Save</button>
 }
 
 @code {
@@ -119,5 +122,11 @@ else
             businessProfile.BrandVoices.RemoveAll(bv => bv.Voice == voice);
         }
     }
+
+    private bool IsBrandVoiceSelected(string voice)
+    {
+        return businessProfile.BrandVoices.Any(bv => bv.Voice == voice);
+    }
+
 
 }

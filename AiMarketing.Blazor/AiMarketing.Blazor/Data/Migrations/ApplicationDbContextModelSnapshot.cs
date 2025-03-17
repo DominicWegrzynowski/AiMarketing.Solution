@@ -144,8 +144,7 @@ namespace AiMarketing.Blazor.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("BusinessProfiles");
                 });
@@ -318,13 +317,11 @@ namespace AiMarketing.Blazor.Data.Migrations
 
             modelBuilder.Entity("AiMarketing.Blazor.Models.BusinessProfile", b =>
                 {
-                    b.HasOne("AiMarketing.Blazor.Data.ApplicationUser", "User")
-                        .WithOne()
-                        .HasForeignKey("AiMarketing.Blazor.Models.BusinessProfile", "UserId")
+                    b.HasOne("AiMarketing.Blazor.Data.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AiMarketing.Blazor.Models.Post", b =>

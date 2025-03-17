@@ -5,6 +5,7 @@ using AiMarketing.Blazor.Data;
 using AiMarketing.Blazor.Services.BusinessProfileService;
 using AiMarketing.Blazor.Services.OpenAiService;
 using AiMarketing.Blazor.Services.PostService;
+using AiMarketing.Blazor.Services.SeedService;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,31 +22,38 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
+// **Remove the manual AddAuthentication() and AddIdentityCookies() calls.**
+// Identity automatically configures the scheme.
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager()
+    .AddDefaultTokenProviders();  // Full Identity setup including RoleManager and UserManager
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
+// Register SeedService after Identity services
+builder.Services.AddScoped<ISeedService, SeedService>();  // Registering ISeedService with the interface
 
+// Other services
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IBusinessProfileService, BusinessProfileService>();
 var openAiApiKey = builder.Configuration["OpenAI:ApiKey"];
 builder.Services.AddSingleton(new OpenAiService(openAiApiKey));
+
 var app = builder.Build();
+
+// Seed the roles during startup
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var seedService = services.GetRequiredService<ISeedService>();
+
+    await seedService.SeedRolesAsync();  // Seeding roles
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -56,7 +64,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

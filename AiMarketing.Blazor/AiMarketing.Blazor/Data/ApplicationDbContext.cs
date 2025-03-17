@@ -1,10 +1,6 @@
 ﻿using AiMarketing.Blazor.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Reflection.Emit;
-using System.Text.Json;
 
 namespace AiMarketing.Blazor.Data
 {
@@ -18,10 +14,10 @@ namespace AiMarketing.Blazor.Data
             base.OnModelCreating(builder);
 
             builder.Entity<BusinessProfile>()
-                   .HasOne(bp => bp.User)
-                   .WithOne()
-                   .HasForeignKey<BusinessProfile>(bp => bp.UserId)
+                   .HasOne<ApplicationUser>()
+                   .WithMany()  // User has many business profiles (inverse relationship)
+                   .HasForeignKey(bp => bp.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
-        }
+                }
     }
 }
