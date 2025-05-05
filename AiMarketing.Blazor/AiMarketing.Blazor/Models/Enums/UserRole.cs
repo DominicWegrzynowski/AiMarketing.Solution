@@ -3,7 +3,7 @@
     public enum UserRole
     {
         TrialUser,
-        BasicUer,
+        BasicUser,
         PremiumUser
     }
 }

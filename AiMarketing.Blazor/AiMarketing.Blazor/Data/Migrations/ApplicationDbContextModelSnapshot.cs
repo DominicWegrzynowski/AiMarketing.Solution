@@ -27,6 +27,12 @@ namespace AiMarketing.Blazor.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("AllowanceEnd")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("AllowanceStart")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
@@ -51,6 +57,9 @@ namespace AiMarketing.Blazor.Data.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetime");
+
+                    b.Property<int>("MonthlyPostAllowance")
+                        .HasColumnType("int");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)

@@ -1,4 +1,6 @@
-﻿using AiMarketing.Blazor.Models;
+﻿using AiMarketing.Blazor.Data;
+using AiMarketing.Blazor.Models;
+using AiMarketing.Blazor.Models.DTOs;
 
 namespace AiMarketing.Blazor.Services.PostService
 {
@@ -6,6 +8,9 @@ namespace AiMarketing.Blazor.Services.PostService
     {
         public Task AddPostsAsync(List<string>? postContents, string userId);
         public Task<Post> GetPostAsync(int postId);
-        public Task<List<Post>> GetUserPosts(string userId);
+        public Task<List<Post>> GetUserPostsAsync(string userId);
+        public Task GenerateAndStorePostsAsync(ApplicationUser user, BusinessProfileDTO profile, int numberOfPosts);
+        public Task EnsurePostAllowanceAsync(ApplicationUser user, int numberOfPosts);
+        public Task SetMonthlyPostAllowanceAsync(ApplicationUser user);
     }
 }

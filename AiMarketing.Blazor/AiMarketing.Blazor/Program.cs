@@ -42,8 +42,8 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IBusinessProfileService, BusinessProfileService>();
 var openAiApiKey = builder.Configuration["OpenAI:ApiKey"];
-builder.Services.AddSingleton(new OpenAiService(openAiApiKey));
-
+//builder.Services.AddSingleton(new OpenAiService(openAiApiKey));
+builder.Services.AddSingleton<IOpenAiService>(provider => new OpenAiService(openAiApiKey));
 var app = builder.Build();
 
 // Seed the roles during startup

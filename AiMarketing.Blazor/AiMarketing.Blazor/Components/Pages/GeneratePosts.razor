@@ -1,32 +1,81 @@
 ﻿@page "/generate-posts"
+@using AiMarketing.Blazor.Services.SeedService
 @inject IPostService _postService
 @inject UserManager<ApplicationUser> _userManager
 @inject AuthenticationStateProvider AuthStateProvider
-@inject OpenAiService _openAiService
+@inject IOpenAiService _openAiService
 @inject IJSRuntime JS
+@inject ISeedService _seedService
+@inject IBusinessProfileService _profileService
 @rendermode InteractiveServer
 
 <h3>Generate AI-Powered Social Media Posts</h3>
 
-
-<button @onclick="async => GeneratePostAsync()">Generate Post</button>
-<p>@debugMessage</p>
-@if(generatedPosts.Any())
+@if(currentUser is not null)
 {
-    <p><strong>Generated Post:</strong></p>
-    @foreach(var post in generatedPosts)
-    {
-        <p>@post</p>
-        <hr />
-    }
+    <div>
+        <p><strong>Your current role: </strong>@currentRole</p>
+
+        <!-- Role Upgrade Options: -->
+        @if (currentRole == "TrialUser")
+        {
+            <div>
+                <h4>Upgrade to Basic User for $50/month</h4>
+                <button @onclick="() => UpgradeRole(UserRole.BasicUser)">Upgrade to Basic User</button>
+            </div>
+            <div>
+                <h4>Upgrade to Premium User for $100/month</h4>
+                <button @onclick="() => UpgradeRole(UserRole.PremiumUser)">Upgrade to Premium User</button>
+            </div>
+        }
+        @if(currentRole == "BasicUser")
+        {
+            <div>
+                <h4>Upgrade to Premium User for $100/month</h4>
+                <button @onclick="() => UpgradeRole(UserRole.PremiumUser)">Upgrade to Premium User</button>
+            </div>
+        }
+
+        <!-- Monthly Post Allowance -->
+        <p><strong>Monthly Posts Allowance</strong> @monthlyPostAllowance posts</p>
+
+        <div>
+            <label for="numberOfPosts">Enter the number of posts to generate today:</label>
+            <input type="number" id="numberOfPosts" @bind="numberOfPosts" min="1" max="@monthlyPostAllowance" />
+            <button @onclick="async () => await GeneratePostAsync()">Generate Post(s)</button>
+        </div>
+        @if(isLoading)
+        {
+            <p><em>Loading...</em></p>
+        }
+        <!-- Show generated Posts -->
+        @if(generatedPosts.Any())
+        {
+            <p><strong>Generated Posts</strong></p>
+            @foreach(var post in generatedPosts)
+            {
+                <p>@post</p>
+                <hr/>
+            }
+        }
+
+    </div>
+}
+else 
+{
+    <p>Please log in to generate posts</p>
 }
 
+
 @code {
-    private string debugMessage = "";
     private BusinessProfileDTO? businessProfile;
     private List<string> generatedPosts = new List<string>();
     private bool isJSInteropReady = false;
     private ApplicationUser? currentUser;
+    private string currentRole = "TrialUser";
+    private int monthlyPostAllowance = 5;
+    private int numberOfPosts = 1;
+    private bool isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,42 +85,107 @@
         if (userPrincipal.Identity is { IsAuthenticated: true })
         {
             currentUser = await _userManager.GetUserAsync(userPrincipal);
+            var roles = await _userManager.GetRolesAsync(currentUser!);
+            currentRole = roles.FirstOrDefault() ?? "TrialUser";
+
+            SetMonthlyPostAllowance();
         }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
         {
+            //Load business profile from sessionStorage if exists
             var jsonData = await JS.InvokeAsync<string>("sessionStorage.getItem", "businessProfile");
 
-            if(!string.IsNullOrEmpty(jsonData))
+            if (!string.IsNullOrEmpty(jsonData))
             {
+                // if found in sessionStorage, use it
                 businessProfile = JsonSerializer.Deserialize<BusinessProfileDTO>(jsonData);
                 isJSInteropReady = true;
-                StateHasChanged();
             }
+            else
+            {
+                //If not found in sessionStorage, fetch from backend(database)
+                businessProfile = await FetchBusinessProfile();
+                isJSInteropReady = businessProfile != null;
+            }
+
+            StateHasChanged();
         }
+    }
+
+    private async Task<BusinessProfileDTO> FetchBusinessProfile()
+    {
+        if(currentUser is not null)
+        {
+            var profile = await _profileService.GetProfileByUserIdAsync(currentUser.Id);
+            if(profile is not null)
+            {
+                return new BusinessProfileDTO
+                {
+                    BusinessName = profile.BusinessName,
+                    Industry = profile.Industry,
+                    Services = profile.Services,
+                    TargetAudience = profile.TargetAudience,
+                    BrandVoices = profile.BrandVoices.Select(bv => bv.Voice).ToList()
+                };
+            } 
+            else 
+            {
+                return null!;
+            }
+
+        }
+        else 
+        {
+            return null!;
+        }
+    }
+
+    private void SetMonthlyPostAllowance()
+    {
+        switch(currentRole)
+        {
+            case "BasicUser":
+                monthlyPostAllowance = 30;
+                break;
+            case "PremiumUser":
+                monthlyPostAllowance = 60;
+                break;
+            default:
+                monthlyPostAllowance = 5; //TrialUser
+                break;
+        }
+    }
+
+    private async Task UpgradeRole(UserRole role)
+    {
+        //For now directly assign the role
+        await _seedService.AssignRoleToUser(currentUser!, role);
+        currentRole = role.ToString();
+        SetMonthlyPostAllowance();
+
+        // In the future, I will redirect to Stripe and handle the payment process there.
+        // Simulate that the role was upgrade and remove upgrade actions
     }
 
     private async Task GeneratePostAsync()
     {
-        if(businessProfile is not null)
+        if(businessProfile is not null && numberOfPosts <= monthlyPostAllowance)
         {
+            isLoading = true;
             generatedPosts.Clear();
-
-            var posts = await _openAiService.GenerateMarketingPostsAsync(
-                businessProfile.BusinessName,
-                businessProfile.Industry,
-                businessProfile.BrandVoices.Select(v => new BrandVoice { Voice = v}).ToList(),
-                5
-            );
-
+            var posts = await _openAiService.GenerateMarketingPostsAsync(businessProfile, numberOfPosts);
             generatedPosts.AddRange(posts);
 
             await _postService.AddPostsAsync(posts, currentUser!.Id);
 
-            StateHasChanged();
+            monthlyPostAllowance -= numberOfPosts;
+            isLoading = false;
         }
+
+        StateHasChanged();
     }
 }

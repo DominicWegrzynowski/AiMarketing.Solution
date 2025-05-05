@@ -45,7 +45,7 @@
 
         if(currentUser is not null)
         {
-            List<Post> listOfPosts =  await _postService.GetUserPosts(currentUser!.Id);
+            List<Post> listOfPosts =  await _postService.GetUserPostsAsync(currentUser!.Id);
             foreach (var post in listOfPosts)
             {
                 generatedPosts!.Add(post.Content);
