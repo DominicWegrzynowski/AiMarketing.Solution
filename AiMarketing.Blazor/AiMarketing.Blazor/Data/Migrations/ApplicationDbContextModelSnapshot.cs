@@ -85,6 +85,21 @@ namespace AiMarketing.Blazor.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("StripeSubscriptionId")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("SubscriptionEnd")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("SubscriptionStart")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("SubscriptionStatus")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("SubscriptionTier")
+                        .HasColumnType("int");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -187,6 +202,30 @@ namespace AiMarketing.Blazor.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("AiMarketing.Blazor.Models.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("PostAllowance")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

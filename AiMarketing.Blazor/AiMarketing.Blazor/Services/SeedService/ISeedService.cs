@@ -7,5 +7,6 @@ namespace AiMarketing.Blazor.Services.SeedService
     {
         Task AssignRoleToUser(ApplicationUser user, UserRole roleName);
         Task SeedRolesAsync();
+        Task SeedProductsAsync(ApplicationDbContext context);
     }
 }

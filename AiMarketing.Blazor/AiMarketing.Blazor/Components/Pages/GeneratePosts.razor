@@ -1,8 +1,11 @@
 ﻿@page "/generate-posts"
 @using AiMarketing.Blazor.Services.AllowanceService
+@using AiMarketing.Blazor.Services.ProductService
 @using AiMarketing.Blazor.Services.SeedService
 @using AiMarketing.Blazor.Components.Shared
 @inject IPostService _postService
+@using System.Globalization
+
 @inject UserManager<ApplicationUser> _userManager
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IOpenAiService _openAiService
@@ -10,6 +13,7 @@
 @inject ISeedService _seedService
 @inject IBusinessProfileService _profileService
 @inject IAllowanceService _allowanceService
+@inject IProductService _productService
 @rendermode InteractiveServer
 
 <h3>Generate AI-Powered Social Media Posts</h3>
@@ -20,24 +24,45 @@
         <p><strong>Your current role: </strong>@currentRole</p>
 
         <!-- Role Upgrade Options: -->
-        @if (currentRole == "TrialUser")
+
+        @* @foreach(var p in products)
+        {
+            if(p.Role == UserRole.Trial)
+            {
+                <div>
+                    <h4>Upgrade to @p.DisplayName for @p.Price.ToString("C2", CultureInfo.GetCultureInfo("en-US")) per month</h4>
+                    <button @onclick="async () => await UpgradeRole(UserRole.Starter)">Upgrade</button>
+                </div>
+
+            }
+        } *@
+
+        @* @if (currentRole == "Trial")
         {
             <div>
                 <h4>Upgrade to Basic User for $50/month</h4>
-                <button @onclick="async () => await UpgradeRole(UserRole.BasicUser)">Upgrade to Basic User</button>
+                <button @onclick="async () => await UpgradeRole(UserRole.Trial)">Upgrade to Basic User</button>
             </div>
             <div>
                 <h4>Upgrade to Premium User for $100/month</h4>
-                <button @onclick="async () => await UpgradeRole(UserRole.PremiumUser)">Upgrade to Premium User</button>
+                <button @onclick="async () => await UpgradeRole(UserRole.Starter)">Upgrade to Premium User</button>
+            </div>
+            <div>
+                <h4>Upgrade to Basic User for $50/month</h4>
+                <button @onclick="async () => await UpgradeRole(UserRole.Trial)">Upgrade to Basic User</button>
+            </div>
+            <div>
+                <h4>Upgrade to Premium User for $100/month</h4>
+                <button @onclick="async () => await UpgradeRole(UserRole.Starter)">Upgrade to Premium User</button>
             </div>
         }
         @if(currentRole == "BasicUser")
         {
             <div>
                 <h4>Upgrade to Premium User for $100/month</h4>
-                <button @onclick="async () => await UpgradeRole(UserRole.PremiumUser)">Upgrade to Premium User</button>
+                <button @onclick="async () => await UpgradeRole(UserRole.Growth)">Upgrade to Premium User</button>
             </div>
-        }
+        } *@
 
         <!-- Monthly Post Allowance -->
         <p><strong>Monthly Posts Allowance</strong> @monthlyPostAllowance posts</p>
@@ -80,7 +105,8 @@ else
     private BusinessProfileDTO? businessProfile;
     private List<Post> generatedPosts = new();
     private ApplicationUser? currentUser;
-    private string currentRole = "TrialUser";
+    private List<Product> products = new();
+    private string currentRole = UserRole.Trial.ToString();
     private int monthlyPostAllowance = 5;
     private int numberOfPosts = 1;
     private bool isLoading = false;
@@ -94,10 +120,12 @@ else
         {
             currentUser = await _userManager.GetUserAsync(userPrincipal);
             var roles = await _userManager.GetRolesAsync(currentUser!);
-            currentRole = roles.FirstOrDefault() ?? "TrialUser";
+            currentRole = roles.FirstOrDefault() ?? UserRole.Trial.ToString();
 
             await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
             monthlyPostAllowance = currentUser.MonthlyPostAllowance;
+
+            products = await _productService.GetAllProductsAsync();
 
             businessProfile = await FetchBusinessProfile();
         }

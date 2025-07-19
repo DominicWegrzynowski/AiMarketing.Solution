@@ -9,7 +9,7 @@ namespace AiMarketing.Blazor.Services.AllowanceService
         Task RefreshAllowanceIfNeededAsync(ApplicationUser user);
         Task<bool> CanGeneratePostsAsync(ApplicationUser user, int numberOfRequestedPosts);
         Task DeductPostsAsync(ApplicationUser user, int numberOfPosts);
-        int GetAllowanceByRole(UserRole role);
+        Task<int> GetAllowanceByRole(UserRole role);
     }
 }
 

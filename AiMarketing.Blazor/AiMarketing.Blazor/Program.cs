@@ -6,6 +6,7 @@ using AiMarketing.Blazor.Services.AllowanceService;
 using AiMarketing.Blazor.Services.BusinessProfileService;
 using AiMarketing.Blazor.Services.OpenAiService;
 using AiMarketing.Blazor.Services.PostService;
+using AiMarketing.Blazor.Services.ProductService;
 using AiMarketing.Blazor.Services.SeedService;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -43,6 +44,7 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IBusinessProfileService, BusinessProfileService>();
 builder.Services.AddScoped<IAllowanceService, AllowanceService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 var openAiApiKey = builder.Configuration["OpenAI:ApiKey"];
 //builder.Services.AddSingleton(new OpenAiService(openAiApiKey));
 builder.Services.AddSingleton<IOpenAiService>(provider => new OpenAiService(openAiApiKey));

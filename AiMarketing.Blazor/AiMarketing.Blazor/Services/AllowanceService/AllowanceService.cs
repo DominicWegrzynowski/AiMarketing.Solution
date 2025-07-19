@@ -1,5 +1,6 @@
 ﻿using AiMarketing.Blazor.Data;
 using AiMarketing.Blazor.Models.Enums;
+using AiMarketing.Blazor.Services.ProductService;
 using Microsoft.AspNetCore.Identity;
 
 namespace AiMarketing.Blazor.Services.AllowanceService
@@ -7,10 +8,12 @@ namespace AiMarketing.Blazor.Services.AllowanceService
     public class AllowanceService : IAllowanceService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IProductService _productService;
 
-        public AllowanceService(UserManager<ApplicationUser> userManager)
+        public AllowanceService(UserManager<ApplicationUser> userManager, IProductService productService)
         {
             _userManager = userManager;
+            _productService = productService;
         }
 
         public async Task<bool> CanGeneratePostsAsync(ApplicationUser user, int numberOfRequestedPosts)
@@ -26,19 +29,18 @@ namespace AiMarketing.Blazor.Services.AllowanceService
             await _userManager.UpdateAsync(user);
         }
 
-        public int GetAllowanceByRole(UserRole role) => role switch
+        public async Task<int> GetAllowanceByRole(UserRole role)
         {
-            UserRole.PremiumUser => 60,
-            UserRole.BasicUser => 30,
-            _ => 5
-        };
+            var productByRole = await _productService.GetProductByRoleAsync(role);
+            return productByRole?.PostAllowance ?? 0;
+        }
 
         public async Task<UserRole> GetUserRoleAsync(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            var roleName = roles.FirstOrDefault() ?? nameof(UserRole.TrialUser);
+            var roleName = roles.FirstOrDefault() ?? nameof(UserRole.Trial);
 
-            return Enum.TryParse<UserRole>(roleName, out var roleEnum) ? roleEnum : UserRole.TrialUser;
+            return Enum.TryParse<UserRole>(roleName, out var roleEnum) ? roleEnum : UserRole.Trial;
         }
 
         public async Task RefreshAllowanceIfNeededAsync(ApplicationUser user)
@@ -47,7 +49,7 @@ namespace AiMarketing.Blazor.Services.AllowanceService
             {
                 var role = await GetUserRoleAsync(user);
 
-                user.MonthlyPostAllowance = GetAllowanceByRole(role);
+                user.MonthlyPostAllowance = await GetAllowanceByRole(role);
                 user.AllowanceStart = DateTime.UtcNow;
                 user.AllowanceEnd = DateTime.UtcNow.AddMonths(1).AddDays(-1);
 

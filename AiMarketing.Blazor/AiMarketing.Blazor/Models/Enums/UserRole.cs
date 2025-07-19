@@ -2,8 +2,9 @@
 {
     public enum UserRole
     {
-        TrialUser,
-        BasicUser,
-        PremiumUser
+        Trial,
+        Starter,
+        Growth,
+        Pro
     }
 }

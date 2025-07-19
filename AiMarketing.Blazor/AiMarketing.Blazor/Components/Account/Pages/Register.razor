@@ -85,7 +85,7 @@
 
         Logger.LogInformation("User created a new account with password.");
 
-        await _seedService.AssignRoleToUser(user, UserRole.TrialUser);
+        await _seedService.AssignRoleToUser(user, UserRole.Trial);
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);

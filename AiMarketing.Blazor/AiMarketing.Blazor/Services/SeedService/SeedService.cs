@@ -1,7 +1,8 @@
 ﻿using AiMarketing.Blazor.Data;
+using AiMarketing.Blazor.Models;
+using AiMarketing.Blazor.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using AiMarketing.Blazor.Models.Enums;
 
 namespace AiMarketing.Blazor.Services.SeedService
 {
@@ -33,5 +34,27 @@ namespace AiMarketing.Blazor.Services.SeedService
                 await _userManager.AddToRoleAsync(user, roleName.ToString());
             }
         }
+
+        public async Task SeedProductsAsync(ApplicationDbContext context)
+        {
+            var productsToSeed = new List<Product>
+            {
+                new Product { Role = UserRole.Trial, DisplayName = "Trial", Price = 0.00m, PostAllowance = 3 },
+                new Product { Role = UserRole.Starter, DisplayName = "Starter", Price = 19.99m, PostAllowance = 10 },
+                new Product { Role = UserRole.Growth, DisplayName = "Growth", Price = 39.99m, PostAllowance = 25 },
+                new Product { Role = UserRole. Pro, DisplayName = "Pro", Price = 59.99m, PostAllowance = 35 }   
+            };
+
+            foreach (var product in productsToSeed)
+            {
+                if (!context.Products.Any(p => p.Role == product.Role))
+                {
+                    context.Products.Add(product);
+                }
+            }
+
+            await context.SaveChangesAsync();
+        }
+
     }
 }

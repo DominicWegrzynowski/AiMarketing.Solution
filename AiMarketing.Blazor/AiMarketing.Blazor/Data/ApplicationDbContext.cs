@@ -9,6 +9,7 @@ namespace AiMarketing.Blazor.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<BusinessProfile> BusinessProfiles { get; set; }
         public DbSet<BrandVoice> BrandVoices { get; set; }
+        public DbSet<Product> Products { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
