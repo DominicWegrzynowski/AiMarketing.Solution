@@ -19,19 +19,11 @@ namespace AiMarketing.Blazor.Services.PostService
             _openAiService = openAiService;
         }
 
-        public async Task AddPostsAsync(List<string>? postContents, string userId)
+        public async Task AddPostsAsync(List<Post>? posts)
         {
             try
             {
-                var posts = postContents!.Select(content => new Post
-                {
-                    UserId = userId,
-                    Content = content,
-                    ScheduledTime = null,
-                    IsPosted = false,
-                }).ToList();
-
-                await _context.Posts.AddRangeAsync(posts);
+                await _context.Posts.AddRangeAsync(posts!);
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
@@ -55,18 +47,32 @@ namespace AiMarketing.Blazor.Services.PostService
             await EnsurePostAllowanceAsync(user, numberOfPosts);
 
             //Generate posts if the user has sufficient allowance
-            var posts = await _openAiService.GenerateMarketingPostsAsync(profile, numberOfPosts);
+            var aiPosts = await _openAiService.GenerateMarketingPostsAsync(profile, numberOfPosts);
 
-            await AddPostsAsync(posts, user.Id);
+
+            var posts = aiPosts.Select(p => new Post
+            {
+                UserId = user.Id,
+                Content = p.Content,
+                ImageRecommendation = p.ImageRecommendation,
+                ScheduledTime = null,
+                IsPosted = false,
+            }).ToList();
+
+            await AddPostsAsync(posts);
 
             user.MonthlyPostAllowance -= numberOfPosts;
             await _userManager.UpdateAsync(user);
 
         }
 
-        public Task<Post> GetPostAsync(int postId)
+        public async Task<Post> GetPostAsync(int postId)
         {
-            throw new NotImplementedException();
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
+            if (post is null)
+                throw new KeyNotFoundException("Post not found");
+
+            return post;
         }
 
         public async Task<List<Post>> GetUserPostsAsync(string userId)
@@ -105,6 +111,19 @@ namespace AiMarketing.Blazor.Services.PostService
 
                 await _userManager.UpdateAsync(user);
             }
+        }
+
+        public async Task UpdatePostAsync(Post updatedPost)
+        {
+            var existingPost = await _context.Posts.FindAsync(updatedPost.Id);
+            if (existingPost is null)
+                throw new KeyNotFoundException("Post not found.");
+
+            existingPost.Content = updatedPost.Content;
+            existingPost.ScheduledTime = updatedPost.ScheduledTime;
+            existingPost.IsPosted = updatedPost.IsPosted;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

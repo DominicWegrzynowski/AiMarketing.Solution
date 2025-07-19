@@ -1,9 +1,11 @@
 ﻿using AiMarketing.Blazor.Models;
 using AiMarketing.Blazor.Models.DTOs;
 using AiMarketing.Blazor.Models.Enums;
+using Microsoft.Identity.Client;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 namespace AiMarketing.Blazor.Services.OpenAiService
 {
     public class OpenAiService : IOpenAiService
@@ -19,16 +21,61 @@ namespace AiMarketing.Blazor.Services.OpenAiService
             };
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
         }
-        public async Task<List<string>> GenerateMarketingPostsAsync(BusinessProfileDTO profile, int numberOfPosts)
+        public async Task<List<AiGeneratedPostDTO>> GenerateMarketingPostsAsync(BusinessProfileDTO profile, int numberOfPosts)
         {
-            // Dynamically set how long the post can be based on numberOfPosts
-            var maxTokens = 3000;
+            var prompt = BuildPrompt(profile, numberOfPosts);
+            var raw = await SendOpenAiPromptAsync(prompt);
+            var parsed = CleanPostContent(raw);
+            var isValid = ValidatePostContent(parsed, numberOfPosts);
 
+            if (!isValid)
+            {
+                raw = await SendOpenAiPromptAsync(prompt);
+                parsed = CleanPostContent(raw);
+                isValid = ValidatePostContent(parsed, numberOfPosts);
+
+                if (!isValid)
+                    throw new Exception($"GPT validation failed. Expected {numberOfPosts} posts, got {parsed.Count}.");
+            }
+
+            return parsed;
+
+
+        }
+        private string BuildPrompt(BusinessProfileDTO profile, int numberOfPosts)
+        {
             string brandVoiceString = profile.BrandVoices != null && profile.BrandVoices.Any()
                                     ? string.Join(", ", profile.BrandVoices)
                                     : "a neutral and engaging tone";
 
-            var prompt = $"Generate {numberOfPosts} social media posts for a {profile.Industry} business named {profile.BusinessName} that offers {profile.Services} in a {brandVoiceString} tone. Make it engaging and creative keeping up to date with the industry standards of the {profile.Industry} business. Don't prefix each one with numbers or bullets, Just list them.";
+            var prompt = $$"""
+                            Generate exactly {{numberOfPosts}} short social media posts for a {{profile.Industry}} business named {{profile.BusinessName}} that offers {{profile.Services}}, written in a {{brandVoiceString}} tone.
+
+                            Each post must:
+                            - Be engaging and creative
+                            - Be no more than 80 words
+                            - Include a short description of a relevant stock image
+
+                            Return the result strictly in the following JSON format:
+                            [
+                              {
+                                "Content": "social media post here",
+                                "ImageRecommendation": "Short image description here"
+                              } 
+                            ]
+
+                            Important:
+                            - Do not include any explanation, commentary, or extra formatting—**return only the raw JSON array**
+                            - Follow the JSON format exactly to ensure parsing
+                        """
+                        ;
+
+            return prompt;
+        }
+
+        private async Task<string> SendOpenAiPromptAsync(string prompt)
+        {
+            var maxTokens = 3000;
 
             var requestBody = new
             {
@@ -57,16 +104,38 @@ namespace AiMarketing.Blazor.Services.OpenAiService
                            .GetProperty("content")
                            .GetString();
 
+            Console.WriteLine("RAW CHATGPT RESPONSE:");
+            Console.WriteLine($"{postsContent}");
 
-            //Split posts based on a custom delimiter
-            var splitPosts = postsContent?.Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
-            if (splitPosts is not null)
+            return postsContent ?? string.Empty;
+        }
+
+        private List<AiGeneratedPostDTO> CleanPostContent(string rawResponse)
+        {
+            try
             {
-                posts.AddRange(splitPosts);
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                return JsonSerializer.Deserialize<List<AiGeneratedPostDTO>>(rawResponse, options) ?? new List<AiGeneratedPostDTO>();
             }
+            catch (JsonException ex)
+            {
+                Console.WriteLine("Failed to parse JSON: " + ex.Message);
+                return new List<AiGeneratedPostDTO>();
+            }
+        }
 
-            return posts;
+        private bool ValidatePostContent(List<AiGeneratedPostDTO> content, int expectedCount)
+        {
+            if (content is null || content.Count != expectedCount)
+                return false;
 
+            return content.All(p =>
+                !string.IsNullOrWhiteSpace(p.Content) &&
+                !string.IsNullOrWhiteSpace(p.ImageRecommendation));
         }
     }
 }

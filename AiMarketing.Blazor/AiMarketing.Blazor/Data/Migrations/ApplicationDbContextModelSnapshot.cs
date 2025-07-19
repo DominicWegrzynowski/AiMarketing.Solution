@@ -168,6 +168,10 @@ namespace AiMarketing.Blazor.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("ImageRecommendation")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<bool>("IsPosted")
                         .HasColumnType("tinyint(1)");
 

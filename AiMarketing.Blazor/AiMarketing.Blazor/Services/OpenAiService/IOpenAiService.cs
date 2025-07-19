@@ -5,6 +5,6 @@ namespace AiMarketing.Blazor.Services.OpenAiService
 {
     public interface IOpenAiService
     {
-        Task<List<string>> GenerateMarketingPostsAsync(BusinessProfileDTO profile, int numberOfPosts);
+        Task<List<AiGeneratedPostDTO>> GenerateMarketingPostsAsync(BusinessProfileDTO profile, int numberOfPosts);
     }
 }

@@ -2,6 +2,7 @@
 @inject IPostService _postService
 @inject UserManager<ApplicationUser> _userManager
 @inject AuthenticationStateProvider AuthStateProvider
+@using AiMarketing.Blazor.Components.Shared;
 @rendermode InteractiveServer
 <div class="row">
     <div class="col-8">
@@ -24,15 +25,16 @@
             <p><strong>Generated Post:</strong></p>
             @foreach (var post in generatedPosts!)
             {
-                <p>@post</p>
-                <hr />
+                <PostCard Post="post"
+                          Editable="true"
+                          OnPostUpdated="RefreshPosts" />
             }
         }
     </div>
 </div>
 @code {
     private ApplicationUser? currentUser;
-    private List<string>? generatedPosts = new List<string>();
+    private List<Post>? generatedPosts = new List<Post>();
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -45,11 +47,10 @@
 
         if(currentUser is not null)
         {
-            List<Post> listOfPosts =  await _postService.GetUserPostsAsync(currentUser!.Id);
-            foreach (var post in listOfPosts)
-            {
-                generatedPosts!.Add(post.Content);
-            }
+            generatedPosts =  await _postService.GetUserPostsAsync(currentUser!.Id);
         }
+        StateHasChanged();
     }
+    private async Task RefreshPosts() =>
+        generatedPosts = await _postService.GetUserPostsAsync(currentUser!.Id);
 }

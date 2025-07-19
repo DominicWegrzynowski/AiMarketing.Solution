@@ -2,6 +2,7 @@ using AiMarketing.Blazor.Client.Pages;
 using AiMarketing.Blazor.Components;
 using AiMarketing.Blazor.Components.Account;
 using AiMarketing.Blazor.Data;
+using AiMarketing.Blazor.Services.AllowanceService;
 using AiMarketing.Blazor.Services.BusinessProfileService;
 using AiMarketing.Blazor.Services.OpenAiService;
 using AiMarketing.Blazor.Services.PostService;
@@ -41,6 +42,7 @@ builder.Services.AddScoped<ISeedService, SeedService>();  // Registering ISeedSe
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IBusinessProfileService, BusinessProfileService>();
+builder.Services.AddScoped<IAllowanceService, AllowanceService>();
 var openAiApiKey = builder.Configuration["OpenAI:ApiKey"];
 //builder.Services.AddSingleton(new OpenAiService(openAiApiKey));
 builder.Services.AddSingleton<IOpenAiService>(provider => new OpenAiService(openAiApiKey));

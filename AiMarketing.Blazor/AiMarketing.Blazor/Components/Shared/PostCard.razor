@@ -1,0 +1,60 @@
+﻿@using AiMarketing.Blazor.Models
+@inject IPostService _postService
+
+@code {
+    [Parameter] public Post Post { get; set; } = new Post();
+    [Parameter] public bool Editable { get; set; } = false;
+    [Parameter] public EventCallback OnPostUpdated { get; set; }
+
+    private bool isEditing = false;
+    private string tempContent = string.Empty;
+    private string tempImageRecommendation = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        if(!isEditing)
+        {
+            tempContent = Post.Content;
+            tempImageRecommendation = Post.ImageRecommendation ?? string.Empty;
+        }
+    }
+
+    private async Task SaveEdit()
+    {
+        Post.Content = tempContent;
+        Post.ImageRecommendation = tempImageRecommendation;
+
+        await _postService.UpdatePostAsync(Post);
+        isEditing = false;
+        if(OnPostUpdated.HasDelegate)
+        {
+            await OnPostUpdated.InvokeAsync();
+        }
+    }
+
+    private void StartEdit() => isEditing = true;
+    private void CancelEdit() => isEditing = false;
+}
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        @if(isEditing)
+        {
+            <textarea class="form-control mb-2" @bind="tempContent" rows="4"></textarea>
+            <input class="form-control mb-2" @bind="tempImageRecommendation" />
+
+            <button class="btn btn-success me-2" @onclick="SaveEdit">Save</button>
+            <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+        }
+        else
+        {
+            <p>@Post.Content</p>
+            <p class="text-muted"><strong>Image Recommendation:</strong> @Post.ImageRecommendation</p>
+
+            @if(Editable)
+            {
+                <button class="btn btn-outline-primary me-2" @onclick="StartEdit">Edit</button>
+            }
+        }
+    </div>
+</div>
