@@ -15,6 +15,9 @@ namespace AiMarketing.Blazor.Models
         [Column(TypeName ="decimal(8,2)")]
         public decimal Price { get; set; }
         public int PostAllowance { get; set; }
+        [Required]
+        public string StripePriceId { get; set; } = string.Empty;
+        public string StripeProductId { get; set; } = string.Empty;
 
     }
 }

@@ -1,56 +1,221 @@
-﻿@page "/"
+﻿@page "/home"
+@using AiMarketing.Blazor.Services.AllowanceService
+@using AiMarketing.Blazor.Services.ProductService
+@using AiMarketing.Blazor.Services.SeedService
+@using AiMarketing.Blazor.Components.Shared
 @inject IPostService _postService
+@inject IOpenAiService _openAiService
 @inject UserManager<ApplicationUser> _userManager
 @inject AuthenticationStateProvider AuthStateProvider
-@using AiMarketing.Blazor.Components.Shared;
+@inject IJSRuntime js
+@inject ISeedService _seedService
+@inject IBusinessProfileService _businessProfileService
+@inject IAllowanceService _allowanceService
+@inject IProductService _productService
+@inject NavigationManager _navigationManager
 @rendermode InteractiveServer
-<div class="row">
-    <div class="col-8">
-        <PageTitle>Home</PageTitle>
-        @if(currentUser is not null)
+
+<PageTitle>Home | Your Posts</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 my-4">
+            <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
+                <h4 class="text-center text-primary mb-3">Let’s Create Your Next Post</h4>
+
+                @if (currentUser != null)
+                {
+                    <div class="text-center mb-3">
+                        <p class="mb-1"><strong>Plan:</strong> @currentRole</p>
+                        <p><strong>Posts Left This Month:</strong> @monthlyPostAllowance</p>
+                        <button class="btn btn-outline-secondary btn-sm mt-2" @onclick='() => _navigationManager.NavigateTo("manage-membership")'>
+                            Manage Membership
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="numberOfPosts" class="form-label">How many posts would you like to generate?</label>
+                        <div class="input-group">
+                            <input type="number"
+                                   class="form-control"
+                                   id="numberOfPosts"
+                                   min="1"
+                                   max="@monthlyPostAllowance"
+                                   @bind="numberOfPosts" />
+                            <button class="btn btn-primary" @onclick="GeneratePostAsync">Generate</button>
+                        </div>
+                    </div>
+
+                    @if (isLoading)
+                    {
+                        <div class="d-flex justify-content-center mt-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        @if (thisWeeksPosts.Any())
         {
-            <h1>Hello @currentUser.FirstName ! Welcome Back.</h1>
-            <h2>Here are your posts:</h2>
-        }
-        else 
-        {
-            <h1> Welcome to AiMarketer</h1>
-        }
+            <div class="col-12 text-center my-4">
+                <h2>This Week</h2>
+                <hr />
+            </div>
 
-
-
-
-        @if (generatedPosts is not null && generatedPosts.Any())
-        {
-            <p><strong>Generated Post:</strong></p>
-            @foreach (var post in generatedPosts!)
+            @foreach (var post in thisWeeksPosts)
             {
-                <PostCard Post="post"
-                          Editable="true"
-                          OnPostUpdated="RefreshPosts" />
+                <div class="col-md-4 mb-4">
+                    <PostCard Post="post" OnPostUpdated="async () => await RefreshPostsAsync()" />
+                </div>
             }
+        }
+
+        @foreach (var group in postsByMonth)
+        {
+            <div class="col-12 text-center my-4">
+                <h2>@group.Key</h2>
+                <hr />
+            </div>
+
+            @foreach (var post in group.Value)
+            {
+                <div class="col-md-4 mb-4">
+                    <PostCard Post="post" OnPostUpdated="async () => await RefreshPostsAsync()" />
+                </div>
+            }
+
+            <div class="col-12 text-center mb-5">
+                <button class="btn btn-outline-secondary" @onclick="ScrollToTop">
+                    ↑ Back to Top
+                </button>
+            </div>
+        }
+
+        @if (!thisWeeksPosts.Any() && !postsByMonth.Any())
+        {
+            <div class="col-12 text-center mt-5">
+                <p>You haven't generated any posts yet. Try generating some above!</p>
+            </div>
         }
     </div>
 </div>
+
 @code {
     private ApplicationUser? currentUser;
-    private List<Post>? generatedPosts = new List<Post>();
+    private BusinessProfileDTO? businessProfile;
+    private List<Post>? generatedPosts = new();
+    private List<Post> thisWeeksPosts = new();
+    private Dictionary<string, List<Post>> postsByMonth = new();
+    private List<Product> products = new();
+    private string currentRole = UserRole.Trial.ToString();
+    private int monthlyPostAllowance = 5;
+    private int numberOfPosts = 1;
+    private bool isLoading = false;
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var userPrincipal = authState.User;
+        var user = await _userManager.GetUserAsync(authState.User);
 
-        if (userPrincipal.Identity is { IsAuthenticated: true })
+        if (user == null) return;
+        currentUser = user;
+
+        var roles = await _userManager.GetRolesAsync(currentUser);
+        currentRole = roles.FirstOrDefault() ?? UserRole.Trial.ToString();
+
+        await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
+        monthlyPostAllowance = currentUser.MonthlyPostAllowance;
+
+        products = await _productService.GetAllProductsAsync();
+
+        var profile = await _businessProfileService.GetProfileByUserIdAsync(currentUser.Id);
+        if (profile == null || string.IsNullOrWhiteSpace(profile.BusinessName) || string.IsNullOrWhiteSpace(profile.Industry) || string.IsNullOrWhiteSpace(profile.TargetAudience) || profile.BrandVoices.Count == 0)
         {
-            currentUser = await _userManager.GetUserAsync(userPrincipal);
+            _navigationManager.NavigateTo("/business-setup");
+            return;
         }
 
-        if(currentUser is not null)
+        businessProfile = new BusinessProfileDTO
         {
-            generatedPosts =  await _postService.GetUserPostsAsync(currentUser!.Id);
+            BusinessName = profile.BusinessName,
+            Industry = profile.Industry,
+            Services = profile.Services,
+            TargetAudience = profile.TargetAudience,
+            BrandVoices = profile.BrandVoices.Select(bv => bv.Voice).ToList()
+        };
+
+        await LoadPostsAsync();
+    }
+
+    private async Task GeneratePostAsync()
+    {
+        if (businessProfile is null || currentUser is null)
+            return;
+
+        isLoading = true;
+        StateHasChanged();
+
+        await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
+
+        var canGenerate = await _allowanceService.CanGeneratePostsAsync(currentUser, numberOfPosts);
+        if (!canGenerate)
+        {
+            isLoading = false;
+            await js.InvokeVoidAsync("alert", "You don’t have enough posts remaining. Please upgrade your plan.");
+            return;
         }
+
+        var aiPosts = await _openAiService.GenerateMarketingPostsAsync(businessProfile, numberOfPosts);
+        var posts = aiPosts.Select(p => new Post
+        {
+            UserId = currentUser.Id,
+            Content = p.Content,
+            ImageRecommendation = p.ImageRecommendation,
+            IsPosted = false,
+        }).ToList();
+
+        await _postService.AddPostsAsync(posts);
+        await _allowanceService.DeductPostsAsync(currentUser, numberOfPosts);
+
+        monthlyPostAllowance = currentUser.MonthlyPostAllowance;
+
+        isLoading = false;
+
+        await LoadPostsAsync();
         StateHasChanged();
     }
-    private async Task RefreshPosts() =>
-        generatedPosts = await _postService.GetUserPostsAsync(currentUser!.Id);
+
+    private async Task LoadPostsAsync()
+    {
+        if (currentUser is null) return;
+
+        generatedPosts = await _postService.GetUserPostsAsync(currentUser.Id);
+        var now = DateTime.UtcNow;
+        var startOfWeek = now.AddDays(-(int)now.DayOfWeek);
+
+        thisWeeksPosts = generatedPosts
+            .Where(p => p.CreatedWhen >= startOfWeek)
+            .OrderByDescending(p => p.CreatedWhen)
+            .ToList();
+
+        postsByMonth = generatedPosts
+            .Where(p => p.CreatedWhen < startOfWeek)
+            .GroupBy(p => p.CreatedWhen.ToString("MMMM yyyy"))
+            .OrderByDescending(g => g.First().CreatedWhen)
+            .ToDictionary(g => g.Key, g => g.ToList());
+    }
+
+    private async Task RefreshPostsAsync()
+    {
+        await LoadPostsAsync();
+        StateHasChanged();
+    }
+
+    private async Task ScrollToTop()
+    {
+        await js.InvokeVoidAsync("scrollToTop");
+    }
 }

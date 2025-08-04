@@ -19,6 +19,26 @@ namespace AiMarketing.Blazor.Data
                    .WithMany()  // User has many business profiles (inverse relationship)
                    .HasForeignKey(bp => bp.UserId)
                    .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var timestamp = DateTime.UtcNow;
+
+            foreach (var entry in ChangeTracker.Entries<Post>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedWhen = timestamp;
+                    entry.Entity.ModifiedWhen = timestamp;
                 }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.ModifiedWhen = timestamp;
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
     }
 }

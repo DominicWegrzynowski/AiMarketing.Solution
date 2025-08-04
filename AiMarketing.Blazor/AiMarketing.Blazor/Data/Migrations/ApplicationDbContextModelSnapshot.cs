@@ -183,6 +183,9 @@ namespace AiMarketing.Blazor.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime>("CreatedWhen")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("ImageRecommendation")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -190,7 +193,7 @@ namespace AiMarketing.Blazor.Data.Migrations
                     b.Property<bool>("IsPosted")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("ScheduledTime")
+                    b.Property<DateTime>("ModifiedWhen")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
@@ -222,6 +225,14 @@ namespace AiMarketing.Blazor.Data.Migrations
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
+
+                    b.Property<string>("StripePriceId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StripeProductId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 

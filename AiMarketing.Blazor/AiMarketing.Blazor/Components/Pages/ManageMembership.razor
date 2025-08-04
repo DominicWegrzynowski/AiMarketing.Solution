@@ -1,0 +1,116 @@
+﻿@page "/manage-membership"
+@using AiMarketing.Blazor.Services.BillingService
+@inject NavigationManager _navigationManager
+@inject IBillingService _billingService
+@inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider _auth
+@rendermode InteractiveServer
+<h3>Upgrade to Pro Plan</h3>
+
+@if(flagHasMembership != true)
+{
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Starter Plan</h5>
+                    <p class="card-text">Get 10 AI-generated posts/month. Great for solo creators and local businesses starting out.</p>
+                    <button class="btn btn-outline-primary w-100" @onclick="() => StartCheckout(starterStripeProductId)">Select Starter</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Growth Plan</h5>
+                    <p class="card-text">Get 25 AI-generated posts/month. Ideal for growing businesses that want to post a few times per week.</p>
+                    <button class="btn btn-primary w-100" @onclick="() => StartCheckout(growthStripeProductId)">Select Growth</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Pro Plan</h5>
+                    <p class="card-text">35 AI-generated posts/month. Ideal for businesses that want to post daily, with extra posts in their pocket.</p>
+                    <button class="btn btn-dark w-100" @onclick="() => StartCheckout(proStripeProductId)">Select Pro</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <h3>Redirecting...</h3>
+}
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="text-danger mt-2">@ErrorMessage</div>
+}
+
+@code {
+    private string? ErrorMessage;
+    private bool flagHasMembership = false;
+    private ApplicationUser? currentUser;
+    private string starterStripeProductId = "prod_Si7rDlk5pcJevG";
+    private string growthStripeProductId = "prod_SivvOzB2QScRA0";
+    private string proStripeProductId = "prod_Sivxg5HOqrDjeS";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = await _userManager.GetUserAsync(authState.User);
+
+        if (user == null) return;
+        currentUser = user;
+        if (!string.IsNullOrEmpty(currentUser.StripeCustomerId))
+        {
+            flagHasMembership = true;
+            StateHasChanged();
+            await LaunchPortal();
+        }
+    }
+
+
+    private async Task StartCheckout(string productId)
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var url = await _billingService.StartCheckoutAsync(productId, user);
+        if (!string.IsNullOrEmpty(url))
+        {
+            _navigationManager.NavigateTo(url, forceLoad: true);
+        }
+        else
+        {
+            ErrorMessage = "Failed to create checkout session.";
+        }
+    }
+
+    private async Task LaunchPortal()
+    {
+        var authState = await _auth.GetAuthenticationStateAsync();
+        var userClaimsPrincipal = authState.User;
+
+    
+        var portalUrl = await _billingService.CreatePortalSessionAsync(userClaimsPrincipal);
+        if (!string.IsNullOrEmpty(portalUrl))
+        {
+            _navigationManager.NavigateTo(portalUrl, forceLoad: true);
+        }
+        else
+        {
+            Console.WriteLine("Failed to create Stripe portal session");
+        }
+    }
+
+
+    private class StripeRedirectResponse
+    {
+        public string? SessionUrl { get; set; }
+    }
+
+}

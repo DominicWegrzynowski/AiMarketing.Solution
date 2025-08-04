@@ -1,0 +1,26 @@
+﻿.landing-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    text-align: center;
+}
+
+    .landing-page h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .landing-page p {
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin-bottom: 2rem;
+    }
+
+    .landing-page .btn-get-started {
+        font-size: 1.2rem;
+        padding: 0.75rem 1.5rem;
+    }

@@ -39,10 +39,34 @@ namespace AiMarketing.Blazor.Services.SeedService
         {
             var productsToSeed = new List<Product>
             {
-                new Product { Role = UserRole.Trial, DisplayName = "Trial", Price = 0.00m, PostAllowance = 3 },
-                new Product { Role = UserRole.Starter, DisplayName = "Starter", Price = 19.99m, PostAllowance = 10 },
-                new Product { Role = UserRole.Growth, DisplayName = "Growth", Price = 39.99m, PostAllowance = 25 },
-                new Product { Role = UserRole. Pro, DisplayName = "Pro", Price = 59.99m, PostAllowance = 35 }   
+                new Product { Role = UserRole.Trial, 
+                              DisplayName = "Trial", 
+                              Price = 0.00m, 
+                              PostAllowance = 3,
+                              StripeProductId = "",
+                              StripePriceId = ""
+                },
+                new Product { Role = UserRole.Starter,
+                              DisplayName = "Starter", 
+                              Price = 19.99m, 
+                              PostAllowance = 10,
+                              StripeProductId = "prod_Si7rDlk5pcJevG",
+                              StripePriceId = "price_1RmhbwPvJwmnZe9m2Ofc1ELl"
+                },
+                new Product { Role = UserRole.Growth,
+                              DisplayName = "Growth",
+                              Price = 39.99m,
+                              PostAllowance = 25,
+                              StripeProductId = "prod_SivvOzB2QScRA0",
+                              StripePriceId = "price_1RnU42PvJwmnZe9my3Un6MPT"
+                },
+                new Product { Role = UserRole.Pro,
+                              DisplayName = "Pro",
+                              Price = 59.99m,
+                              PostAllowance = 35,
+                              StripeProductId = "prod_Sivxg5HOqrDjeS",
+                              StripePriceId = "price_1RnU5BPvJwmnZe9mzMxHfxlD"
+                }
             };
 
             foreach (var product in productsToSeed)

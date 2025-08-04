@@ -7,52 +7,56 @@
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 @attribute [Authorize]
-<h3>Set Up Your Business Profile</h3>
 
-@if (isLoading)
-{
-    <p>Loading...</p>
-}
-else 
-{
-    <EditForm Model="businessProfile" OnValidSubmit="SaveBusinessProfile">
-        <DataAnnotationsValidator />
-        <ValidationSummary></ValidationSummary>
-        <InputText @bind-Value="businessProfile.UserId" type="hidden" />
-        <div>
-            <label>Business Name</label>
-            <InputText @bind-Value="businessProfile.BusinessName" class="form-control" required />
-        </div>
-        <div>
-            <label>Industry</label>
-            <InputText @bind-Value="businessProfile.Industry" class="form-control" required />
-        </div>
-        <div>
-            <label>Services Offered</label>
-            <InputText @bind-Value="businessProfile.Services" class="form-control" required />
-        </div>
-        <div>
-            <label>Target Audience</label>
-            <InputText @bind-Value="businessProfile.TargetAudience" class="form-control" required />
-        </div>
-        <div>
-            <label>Brand Voices (Select Multiple)</label>
-            @foreach(var voice in availableBrandVoices)
-            {
-                <div>
-                    <input type="checkbox" 
-                           checked="@(IsBrandVoiceSelected(voice))"  
-                           value="@voice" 
-                           @onchange="(e) => ToggleBrandVoice(voice, (bool)((ChangeEventArgs)e).Value!)" />
-                    @voice
-                </div>
-            }
-        </div>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h3 class="justify-content-center">Tell us about your business</h3>
+        @if (isLoading)
+    {
+        <p>Loading...</p>
+    }
+    else 
+    {
+        <EditForm Model="businessProfile" OnValidSubmit="SaveBusinessProfile">
+            <DataAnnotationsValidator />
+            <ValidationSummary></ValidationSummary>
+            <InputText @bind-Value="businessProfile.UserId" type="hidden" />
+            <div>
+                <label>Business Name</label>
+                <InputText @bind-Value="businessProfile.BusinessName" class="form-control" required />
+            </div>
+            <div>
+                <label>Industry</label>
+                <InputText @bind-Value="businessProfile.Industry" class="form-control" required />
+            </div>
+            <div>
+                <label>Services Offered</label>
+                <InputText @bind-Value="businessProfile.Services" class="form-control" required />
+            </div>
+            <div>
+                <label>Target Audience</label>
+                <InputText @bind-Value="businessProfile.TargetAudience" class="form-control" required />
+            </div>
+            <div>
+                <label>Brand Voices (Select Multiple)</label>
+                @foreach(var voice in availableBrandVoices)
+                {
+                    <div>
+                        <input type="checkbox" 
+                               checked="@(IsBrandVoiceSelected(voice))"  
+                               value="@voice" 
+                               @onchange="(e) => ToggleBrandVoice(voice, (bool)((ChangeEventArgs)e).Value!)" />
+                        @voice
+                    </div>
+                }
+            </div>
+            <br />
+            <button type="submit" class="btn btn-success col-12">Save & Generate Posts</button>
+        </EditForm>
+    }
 
-        <button type="submit" class="btn btn-primary">Save Profile</button>
-    </EditForm>
-}
-
+    </div>
+</div>
 @code {
     private bool isLoading = true;
     private BusinessProfile businessProfile = new();
@@ -106,7 +110,7 @@ else
             var jsonData = JsonSerializer.Serialize(profileDTO);
             await JS.InvokeVoidAsync("sessionStorage.setItem", "businessProfile", jsonData);
 
-            _navigation.NavigateTo("/generate-posts");
+            _navigation.NavigateTo("/home");
         }
     }
 

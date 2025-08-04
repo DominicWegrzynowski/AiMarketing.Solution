@@ -55,7 +55,6 @@ namespace AiMarketing.Blazor.Services.PostService
                 UserId = user.Id,
                 Content = p.Content,
                 ImageRecommendation = p.ImageRecommendation,
-                ScheduledTime = null,
                 IsPosted = false,
             }).ToList();
 
@@ -120,7 +119,6 @@ namespace AiMarketing.Blazor.Services.PostService
                 throw new KeyNotFoundException("Post not found.");
 
             existingPost.Content = updatedPost.Content;
-            existingPost.ScheduledTime = updatedPost.ScheduledTime;
             existingPost.IsPosted = updatedPost.IsPosted;
 
             await _context.SaveChangesAsync();

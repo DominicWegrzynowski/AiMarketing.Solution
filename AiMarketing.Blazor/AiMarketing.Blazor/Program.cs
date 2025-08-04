@@ -3,6 +3,7 @@ using AiMarketing.Blazor.Components;
 using AiMarketing.Blazor.Components.Account;
 using AiMarketing.Blazor.Data;
 using AiMarketing.Blazor.Services.AllowanceService;
+using AiMarketing.Blazor.Services.BillingService;
 using AiMarketing.Blazor.Services.BusinessProfileService;
 using AiMarketing.Blazor.Services.OpenAiService;
 using AiMarketing.Blazor.Services.PostService;
@@ -26,10 +27,15 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 
 // **Remove the manual AddAuthentication() and AddIdentityCookies() calls.**
 // Identity automatically configures the scheme.
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();  // Full Identity setup including RoleManager and UserManager
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedEmail = true;
+}).AddEntityFrameworkStores<ApplicationDbContext>()
+  .AddSignInManager()
+  .AddDefaultTokenProviders();  // Full Identity setup including RoleManager and UserManager
+
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -39,15 +45,23 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // Register SeedService after Identity services
 builder.Services.AddScoped<ISeedService, SeedService>();  // Registering ISeedService with the interface
 
-// Other services
+// General services
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IBusinessProfileService, BusinessProfileService>();
 builder.Services.AddScoped<IAllowanceService, AllowanceService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IBillingService, BillingService>();
+builder.Services.AddControllers();
+
+// Register OpenAI service
 var openAiApiKey = builder.Configuration["OpenAI:ApiKey"];
-//builder.Services.AddSingleton(new OpenAiService(openAiApiKey));
-builder.Services.AddSingleton<IOpenAiService>(provider => new OpenAiService(openAiApiKey));
+builder.Services.AddSingleton<IOpenAiService>(provider => new OpenAiService(openAiApiKey!));
+
+// Stripe configuration
+var stripeApiSecretKey = builder.Configuration["Stripe:SecretKey"];
+Stripe.StripeConfiguration.ApiKey = stripeApiSecretKey;
+
 var app = builder.Build();
 
 // Seed the roles during startup
@@ -55,8 +69,10 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var seedService = services.GetRequiredService<ISeedService>();
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
     await seedService.SeedRolesAsync();  // Seeding roles
+    await seedService.SeedProductsAsync(dbContext);  // Seeding products
 }
 
 // Configure the HTTP request pipeline.
@@ -74,7 +90,12 @@ else
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
+app.MapControllers();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

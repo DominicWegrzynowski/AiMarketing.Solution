@@ -1,15 +1,16 @@
 ﻿@using AiMarketing.Blazor.Models
 @inject IPostService _postService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
 
 @code {
     [Parameter] public Post Post { get; set; } = new Post();
-    [Parameter] public bool Editable { get; set; } = false;
     [Parameter] public EventCallback OnPostUpdated { get; set; }
 
     private bool isEditing = false;
     private string tempContent = string.Empty;
     private string tempImageRecommendation = string.Empty;
-
+    private bool copySuccess = false;
     protected override void OnParametersSet()
     {
         if(!isEditing)
@@ -32,29 +33,72 @@
         }
     }
 
+    private async Task CopyToClipboard()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Post.Content);
+            copySuccess = true;
+            StateHasChanged();
+            await Task.Delay(2000);
+            copySuccess = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Clipboard error: {ex.Message}");
+        }
+    }
+
+
     private void StartEdit() => isEditing = true;
     private void CancelEdit() => isEditing = false;
 }
 
-<div class="card shadow-sm mb-3">
-    <div class="card-body">
+
+<div class="card w-100 h-100 d-flex flex-column ">
+    <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
         @if(isEditing)
         {
             <textarea class="form-control mb-2" @bind="tempContent" rows="4"></textarea>
-            <input class="form-control mb-2" @bind="tempImageRecommendation" />
+            <textarea class="form-control mb-2" @bind="tempImageRecommendation" rows="4"></textarea>
 
-            <button class="btn btn-success me-2" @onclick="SaveEdit">Save</button>
-            <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+            <div class="mt-auto">
+                <button class="btn btn-success me-2" @onclick="SaveEdit">Save</button>
+                <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+            </div>
         }
         else
         {
-            <p>@Post.Content</p>
-            <p class="text-muted"><strong>Image Recommendation:</strong> @Post.ImageRecommendation</p>
+            <div class="flex-grow-1">
+                <p>@Post.Content</p>
+                <p class="text-muted"><strong>Image Recommendation:</strong> @Post.ImageRecommendation</p>
+            </div>
+            <div class="d-flex flex-column align-items-start gap-2 mt-auto position-relative">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" @onclick="StartEdit">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-outline-primary" @onclick="CopyToClipboard">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                </div>
 
-            @if(Editable)
-            {
-                <button class="btn btn-outline-primary me-2" @onclick="StartEdit">Edit</button>
-            }
+                @if (copySuccess)
+                {
+                    <div class="alert alert-success p-1 px-2 m-0"
+                         style="font-size: 0.875rem;" role="alert">
+                        Post copied!
+                    </div>
+                }
+            </div>
+
+
+
+            
         }
+    </div>
+    <div class="card-footer" text-muted small>
+        Created: @Post.CreatedWhen.ToString("M/d/yyyy") | Last Updated: @Post.ModifiedWhen.ToString("M/d/yyyy")
     </div>
 </div>

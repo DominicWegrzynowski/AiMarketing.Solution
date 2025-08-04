@@ -1,0 +1,44 @@
+﻿@page "/"
+@using AiMarketing.Blazor.Components.Layout
+@layout LandingLayout
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+@rendermode InteractiveServer
+
+<header class="bg-light text-center py-5">
+    <div class="container">
+        <h1 class="display-4">Welcome to Prompt-n-Post</h1>
+        <p class="lead">
+            Effortless social media content generation for your business. Set your voice, generate posts, and grow your brand—all in seconds.
+        </p>
+    </div>
+</header>
+
+<div class="container text-center py-5">
+    <div class="mx-auto d-block text-center"
+         style="width: 100%; max-width: 640px; height: 360px; background-color: #ddd; margin-bottom: 2rem;">
+        <p style="line-height: 360px;">Video Coming Soon</p>
+    </div>
+
+
+    <button @onclick="() => Navigate()" class=" btn btn-primary btn-lg mt-3">Get Started</button>
+</div>
+
+
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            Navigation.NavigateTo("/home");
+        }
+    }
+
+    private void Navigate()
+    {
+
+        Navigation.NavigateTo("Account/Login");
+    }
+}
