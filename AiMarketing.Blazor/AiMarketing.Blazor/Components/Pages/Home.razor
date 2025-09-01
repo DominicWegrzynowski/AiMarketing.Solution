@@ -1,8 +1,4 @@
 ﻿@page "/home"
-@using AiMarketing.Blazor.Services.AllowanceService
-@using AiMarketing.Blazor.Services.ProductService
-@using AiMarketing.Blazor.Services.SeedService
-@using AiMarketing.Blazor.Components.Shared
 @inject IPostService _postService
 @inject IOpenAiService _openAiService
 @inject UserManager<ApplicationUser> _userManager
@@ -13,13 +9,14 @@
 @inject IAllowanceService _allowanceService
 @inject IProductService _productService
 @inject NavigationManager _navigationManager
+@inject IBillingService _billingService
 @rendermode InteractiveServer
 
 <PageTitle>Home | Your Posts</PageTitle>
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12 my-4">
+        <div class="col-md-12 col-sm-6 my-4">
             <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
                 <h4 class="text-center text-primary mb-3">Let’s Create Your Next Post</h4>
 
@@ -27,7 +24,8 @@
                 {
                     <div class="text-center mb-3">
                         <p class="mb-1"><strong>Plan:</strong> @currentRole</p>
-                        <p><strong>Posts Left This Month:</strong> @monthlyPostAllowance</p>
+                        <p><strong>Posts Left This Month:</strong> @postsRemaining</p>
+                        <p><strong>Next Cycle Begins:</strong> @nextCycleDate.ToString()</p>
                         <button class="btn btn-outline-secondary btn-sm mt-2" @onclick='() => _navigationManager.NavigateTo("manage-membership")'>
                             Manage Membership
                         </button>
@@ -40,7 +38,7 @@
                                    class="form-control"
                                    id="numberOfPosts"
                                    min="1"
-                                   max="@monthlyPostAllowance"
+                                   max="@postsRemaining"
                                    @bind="numberOfPosts" />
                             <button class="btn btn-primary" @onclick="GeneratePostAsync">Generate</button>
                         </div>
@@ -111,14 +109,20 @@
     private Dictionary<string, List<Post>> postsByMonth = new();
     private List<Product> products = new();
     private string currentRole = UserRole.Trial.ToString();
-    private int monthlyPostAllowance = 5;
+    private int postsRemaining = 0;
     private int numberOfPosts = 1;
     private bool isLoading = false;
+    private DateTime? nextCycleDate;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = await _userManager.GetUserAsync(authState.User);
+
+        if (!(authState.User?.Identity?.IsAuthenticated ?? false))
+        {
+            _navigationManager.NavigateTo("/", replace: true);
+        }
 
         if (user == null) return;
         currentUser = user;
@@ -126,8 +130,11 @@
         var roles = await _userManager.GetRolesAsync(currentUser);
         currentRole = roles.FirstOrDefault() ?? UserRole.Trial.ToString();
 
-        await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
-        monthlyPostAllowance = currentUser.MonthlyPostAllowance;
+        // await _billingService.CheckAndHandleSubscriptionExpirationAsync(user);
+        // await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
+        postsRemaining = Math.Max(0, currentUser.MonthlyPostAllowance - currentUser.PostsUsedThisPeriod);
+
+        nextCycleDate = currentUser.CurrentPeriodEndUtc;
 
         products = await _productService.GetAllProductsAsync();
 
@@ -158,7 +165,7 @@
         isLoading = true;
         StateHasChanged();
 
-        await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
+        // await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
 
         var canGenerate = await _allowanceService.CanGeneratePostsAsync(currentUser, numberOfPosts);
         if (!canGenerate)
@@ -180,7 +187,8 @@
         await _postService.AddPostsAsync(posts);
         await _allowanceService.DeductPostsAsync(currentUser, numberOfPosts);
 
-        monthlyPostAllowance = currentUser.MonthlyPostAllowance;
+        currentUser = await _userManager.FindByIdAsync(currentUser.Id);
+        postsRemaining = Math.Max(0, currentUser!.MonthlyPostAllowance - currentUser!.PostsUsedThisPeriod);
 
         isLoading = false;
 

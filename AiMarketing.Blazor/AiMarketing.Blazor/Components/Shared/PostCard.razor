@@ -1,5 +1,4 @@
-﻿@using AiMarketing.Blazor.Models
-@inject IPostService _postService
+﻿@inject IPostService _postService
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 
@@ -74,28 +73,43 @@
                 <p>@Post.Content</p>
                 <p class="text-muted"><strong>Image Recommendation:</strong> @Post.ImageRecommendation</p>
             </div>
-            <div class="d-flex flex-column align-items-start gap-2 mt-auto position-relative">
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-auto">
+
+                <!-- actions: edit/copy -->
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-primary" @onclick="StartEdit">
+                    <button class="btn btn-warning" title="Edit post" @onclick="StartEdit">
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-outline-primary" @onclick="CopyToClipboard">
+                    <button class="btn btn-success" title="Copy post" @onclick="CopyToClipboard">
                         <i class="bi bi-copy"></i>
                     </button>
                 </div>
 
-                @if (copySuccess)
-                {
-                    <div class="alert alert-success p-1 px-2 m-0"
-                         style="font-size: 0.875rem;" role="alert">
-                        Post copied!
-                    </div>
-                }
+                <!-- separator only on md+ -->
+                <div class="vr mx-2 d-none d-md-block"></div>
+
+                <!-- force wrap below md so socials start on a new row -->
+                <div class="w-100 d-md-none"></div>
+
+                <!-- socials -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-outline-primary btn-icon" title="Open Instagram" target="_blank" rel="noopener noreferrer" href="https://instagram.com">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a class="btn btn-outline-primary btn-icon" title="Open Facebook" target="_blank" rel="noopener noreferrer" href="https://facebook.com">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a class="btn btn-outline-primary btn-icon" title="Open X" target="_blank" rel="noopener noreferrer" href="https://x.com">
+                        <i class="bi bi-twitter-x"></i>
+                    </a>
+                    <a class="btn btn-outline-primary btn-icon" title="Open Linkedin" target="_blank" rel="noopener noreferrer" href="https://linkedin.com">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a class="btn btn-outline-primary btn-icon" title="Open Threads" target="_blank" rel="noopener noreferrer" href="https://threads.com">
+                        <i class="bi bi-threads"></i>
+                    </a>
+                </div>
             </div>
-
-
-
-            
         }
     </div>
     <div class="card-footer" text-muted small>

@@ -1,0 +1,14 @@
+﻿.btn-icon {
+    width: 40px; /* 44px if you want bigger mobile tap targets */
+    height: 40px;
+    padding: 0; /* remove default btn padding */
+    display: inline-flex; /* perfectly center the icon */
+    align-items: center;
+    justify-content: center;
+    border-radius: .5rem; /* match your buttons */
+}
+
+.btn-icon i {
+    font-size: 1.1rem;
+    line-height: 1;
+}

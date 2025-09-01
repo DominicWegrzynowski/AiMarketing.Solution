@@ -83,27 +83,28 @@ namespace AiMarketing.Blazor.Services.BillingService
         }
         public async Task DowngradeExpiredUsersAsync()
         {
-            var expiredUsers = await _context.Users
-                .Where(u => u.AllowanceEnd < DateTime.Now &&
-                            u.SubscriptionTier != UserRole.Trial)
-                .ToListAsync();
+            await Task.CompletedTask;
+            //var expiredUsers = await _context.Users
+            //    .Where(u => u.AllowanceEnd < DateTime.Now &&
+            //                u.SubscriptionTier != UserRole.Trial)
+            //    .ToListAsync();
 
-            foreach(var user in expiredUsers)
-            {
-                user.SubscriptionTier = UserRole.Trial;
-                user.MonthlyPostAllowance = 3;
-                user.SubscriptionStatus = "canceled";
+            //foreach(var user in expiredUsers)
+            //{
+            //    user.SubscriptionTier = UserRole.Trial;
+            //    user.MonthlyPostAllowance = 3;
+            //    user.SubscriptionStatus = "canceled";
 
-                var currentRoles = await _userManager.GetRolesAsync(user);
-                if(currentRoles.Any())
-                {
-                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
-                }
+            //    var currentRoles = await _userManager.GetRolesAsync(user);
+            //    if(currentRoles.Any())
+            //    {
+            //        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            //    }
 
-                await _userManager.AddToRoleAsync(user, UserRole.Trial.ToString());
-            }
+            //    await _userManager.AddToRoleAsync(user, UserRole.Trial.ToString());
+            //}
 
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
         }
 
         public async Task ResetTrialAllowancesAsync()
@@ -118,6 +119,25 @@ namespace AiMarketing.Blazor.Services.BillingService
             }
 
             await _context.SaveChangesAsync();
+        }
+        public async Task CheckAndHandleSubscriptionExpirationAsync(ApplicationUser user)
+        {
+            await Task.CompletedTask;
+            //if (user.AllowanceEnd < DateTime.UtcNow && user.SubscriptionTier != UserRole.Trial)
+            //{
+            //    user.SubscriptionTier = UserRole.Trial;
+            //    user.MonthlyPostAllowance = 3;
+            //    user.SubscriptionStatus = "canceled";
+
+            //    var currentRoles = await _userManager.GetRolesAsync(user);
+            //    if (currentRoles.Any())
+            //        await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+            //    await _userManager.AddToRoleAsync(user, UserRole.Trial.ToString());
+
+            //    await _userManager.UpdateAsync(user);
+            //    await _context.SaveChangesAsync();
+            //}
         }
     }
 }

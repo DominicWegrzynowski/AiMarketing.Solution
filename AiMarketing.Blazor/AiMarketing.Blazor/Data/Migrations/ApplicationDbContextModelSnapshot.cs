@@ -37,12 +37,21 @@ namespace AiMarketing.Blazor.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
 
+                    b.Property<DateTime?>("CurrentPeriodEndUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("CurrentPeriodStartUtc")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<int?>("EntitlementTierNext")
+                        .HasColumnType("int");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -77,6 +86,9 @@ namespace AiMarketing.Blazor.Data.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("PostsUsedThisPeriod")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");

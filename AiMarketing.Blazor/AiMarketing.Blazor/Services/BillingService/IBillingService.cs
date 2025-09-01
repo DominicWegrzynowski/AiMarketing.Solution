@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using AiMarketing.Blazor.Data;
+using System.Security.Claims;
 
 namespace AiMarketing.Blazor.Services.BillingService
 {
@@ -6,7 +7,7 @@ namespace AiMarketing.Blazor.Services.BillingService
     {
         Task<string?> StartCheckoutAsync(string priceId, ClaimsPrincipal principal);
         Task<string?> CreatePortalSessionAsync(ClaimsPrincipal principal);
-        Task DowngradeExpiredUsersAsync();
+        Task CheckAndHandleSubscriptionExpirationAsync(ApplicationUser user);
         Task ResetTrialAllowancesAsync();
     }
 }

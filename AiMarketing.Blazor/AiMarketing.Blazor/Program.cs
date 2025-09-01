@@ -5,6 +5,8 @@ using AiMarketing.Blazor.Data;
 using AiMarketing.Blazor.Services.AllowanceService;
 using AiMarketing.Blazor.Services.BillingService;
 using AiMarketing.Blazor.Services.BusinessProfileService;
+using AiMarketing.Blazor.Services.EmailSender;
+using AiMarketing.Blazor.Services.EmailService;
 using AiMarketing.Blazor.Services.OpenAiService;
 using AiMarketing.Blazor.Services.PostService;
 using AiMarketing.Blazor.Services.ProductService;
@@ -52,6 +54,8 @@ builder.Services.AddScoped<IBusinessProfileService, BusinessProfileService>();
 builder.Services.AddScoped<IAllowanceService, AllowanceService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IBillingService, BillingService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityEmailSender>();
 builder.Services.AddControllers();
 
 // Register OpenAI service

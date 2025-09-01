@@ -157,73 +157,159 @@ public class BillingController : ControllerBase
             switch(stripeEvent.Type)
             {
                 case "checkout.session.completed":
-                    // Handle checkout completed
-                    if(stripeEvent.Data.Object is Session session)
+                    if (stripeEvent.Data.Object is Session session)
                     {
                         var user = _userManager.Users.FirstOrDefault(u => u.StripeCustomerId == session.CustomerId);
-                        if(user is not null)
-                        {
-                            user.StripeSubscriptionId = session.SubscriptionId;
-                            user.SubscriptionStatus = session.Status;
-                            user.SubscriptionStart = DateTime.UtcNow;
-                            user.SubscriptionEnd = DateTime.UtcNow.AddMonths(1);
+                        if (user is null) break;
 
-                            if (session.Metadata.TryGetValue("plan", out var planName) &&
-                                Enum.TryParse<UserRole>(planName, ignoreCase: true, out var tier))
-                            {
-                                await UpdateUserPlanAsync(user, tier);
-                            }
-                            await _userManager.UpdateAsync(user);
-                            await _context.SaveChangesAsync();
+                        var subService = new SubscriptionService();
+                        var sub = await subService.GetAsync(session.SubscriptionId);
+
+                        // Only proceed if usable now (active or trialing)
+                        if (!(sub.Status == "active" || sub.Status == "trialing"))
+                            break;
+
+                        var item = sub.Items?.Data?.FirstOrDefault();
+                        if (item is null) break;
+
+                        var periodStart = item.CurrentPeriodStart; // DateTime (UTC)
+                        var periodEnd = item.CurrentPeriodEnd;   // DateTime (UTC)
+
+                        // Idempotency: skip if we already set this exact period
+                        if (user.CurrentPeriodEndUtc.HasValue && user.CurrentPeriodEndUtc.Value == periodEnd)
+                            break;
+
+                        user.StripeSubscriptionId = sub.Id;
+                        user.SubscriptionStatus = sub.Status;
+                        user.SubscriptionStart = DateTime.UtcNow;
+
+                        var priceId = item.Price.Id;
+                        var product = await _context.Products.FirstOrDefaultAsync(p => p.StripePriceId == priceId);
+                        if (product is not null)
+                        {
+                            await ApplyCurrentCycleEntitlementsAsync(user, product.Role, periodStart, periodEnd);
+                            user.EntitlementTierNext = null;
                         }
+
+                        await _userManager.UpdateAsync(user);
+                        await _context.SaveChangesAsync();
                     }
                     break;
                 case "customer.subscription.updated":
-                    // Handle subscription updates
                     if (stripeEvent.Data.Object is Subscription updatedSubscription)
                     {
                         var user = _userManager.Users.FirstOrDefault(u => u.StripeCustomerId == updatedSubscription.CustomerId);
-                        if (user is not null)
-                        {
-                            // Extract product ID from subscription item
-                            var priceId = updatedSubscription.Items.Data.First().Price.Id; // Why use priceid instead of productid?
-                            var product = await _context.Products.FirstOrDefaultAsync(p => p.StripePriceId == priceId);
+                        if (user is null) break;
 
-                            if (product is not null)
-                            {
-                                await UpdateUserPlanAsync(user, product.Role);
-                                user.AllowanceEnd = updatedSubscription.Items.Data.First().CurrentPeriodEnd;
-                                user.SubscriptionStatus = updatedSubscription.Status;
-                                await _userManager.UpdateAsync(user);
-                                await _context.SaveChangesAsync();
-                            }
+                        user.SubscriptionStatus = updatedSubscription.Status;
+
+                        var item = updatedSubscription.Items?.Data?.FirstOrDefault();
+                        if (item is null) break;
+
+                        var periodStart = item.CurrentPeriodStart; // DateTime (UTC)
+                        var periodEnd = item.CurrentPeriodEnd;   // DateTime (UTC)
+
+                        var newPriceId = item.Price.Id;
+                        var newProduct = await _context.Products.FirstOrDefaultAsync(p => p.StripePriceId == newPriceId);
+
+                        // Keep dates fresh for UI regardless
+                        user.CurrentPeriodStartUtc = periodStart;
+                        user.CurrentPeriodEndUtc = periodEnd;
+
+                        // If we can't resolve the product, just persist dates/status and bail
+                        if (newProduct is null)
+                        {
+                            await _userManager.UpdateAsync(user);
+                            await _context.SaveChangesAsync();
+                            break;
                         }
+
+                        var currentProduct = await _context.Products.FirstOrDefaultAsync(p => p.Role == user.SubscriptionTier);
+                        var isUpgrade = currentProduct != null && newProduct.PostAllowance > currentProduct.PostAllowance;
+                        var isDowngrade = currentProduct != null && newProduct.PostAllowance < currentProduct.PostAllowance;
+
+                        // ---- FIRST SIGHT (baseline init): if we have no stored period yet, DO NOT treat as rollover ----
+                        if (!user.CurrentPeriodStartUtc.HasValue || user.CurrentPeriodStartUtc.Value == default)
+                        {
+                            // If you want instant upgrades, you can apply them even on first sight:
+                            if (isUpgrade)
+                            {
+                                await ApplyCurrentCycleEntitlementsAsync(user, newProduct.Role, periodStart, periodEnd);
+                                user.EntitlementTierNext = null;
+                            }
+                            else if (isDowngrade)
+                            {
+                                // Schedule the downgrade for next cycle
+                                user.EntitlementTierNext = newProduct.Role;
+                            }
+
+                            await _userManager.UpdateAsync(user);
+                            await _context.SaveChangesAsync();
+                            break;
+                        }
+
+                        // ---- REAL ROLLOVER: only when Stripe actually advances the periodStart ----
+                        var isRollover = periodStart > user.CurrentPeriodStartUtc.Value;
+                        if (isRollover)
+                        {
+                            // Apply scheduled next tier if present; otherwise apply the tier Stripe is billing now
+                            var tierToApply = user.EntitlementTierNext ?? newProduct.Role;
+
+                            await ApplyCurrentCycleEntitlementsAsync(user, tierToApply, periodStart, periodEnd);
+                            user.EntitlementTierNext = null;
+
+                            await _userManager.UpdateAsync(user);
+                            await _context.SaveChangesAsync();
+                            break;
+                        }
+
+                        // ---- MID-CYCLE CHANGE, no rollover ----
+                        if (isUpgrade)
+                        {
+                            // Instant upgrades (optional)
+                            await ApplyCurrentCycleEntitlementsAsync(user, newProduct.Role, periodStart, periodEnd);
+                            user.EntitlementTierNext = null;
+                        }
+                        else if (isDowngrade)
+                        {
+                            // Defer downgrades
+                            user.EntitlementTierNext = newProduct.Role;
+                        }
+                        // lateral changes: do nothing
+
+                        await _userManager.UpdateAsync(user);
+                        await _context.SaveChangesAsync();
                     }
                     break;
+
                 case "customer.subscription.deleted":
-                    // Handle subscription cancellation
-                    if(stripeEvent.Data.Object is Subscription deletedSubscription)
+                    if (stripeEvent.Data.Object is Subscription deletedSubscription)
                     {
                         var user = _userManager.Users.FirstOrDefault(u => u.StripeCustomerId == deletedSubscription.CustomerId);
                         if (user is not null)
                         {
                             user.SubscriptionStatus = deletedSubscription.Status;
-                            user.SubscriptionTier = UserRole.Trial;
-                            user.MonthlyPostAllowance = 0;
 
-                            var currentRoles = await _userManager.GetRolesAsync(user);
-                            if(currentRoles.Any())
+                            // If you want to end access immediately on hard cancel:
+                            if (deletedSubscription.CancelAt == null && deletedSubscription.CanceledAt != null)
                             {
-                                await _userManager.RemoveFromRolesAsync(user, currentRoles);
-                            }
+                                // Hard cancel now
+                                user.SubscriptionTier = UserRole.Trial;
+                                user.MonthlyPostAllowance = 0;
+                                user.PostsUsedThisPeriod = 0;
+                                user.EntitlementTierNext = null;
 
-                            await _userManager.AddToRoleAsync(user, UserRole.Trial.ToString());
+                                var currentRoles = await _userManager.GetRolesAsync(user);
+                                if (currentRoles.Any())
+                                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                                await _userManager.AddToRoleAsync(user, UserRole.Trial.ToString());
+                            }
+                            // If it was "cancel at period end", do nothing here—access remains until invoice not paid at next cycle.
+
                             await _userManager.UpdateAsync(user);
                             await _context.SaveChangesAsync();
                         }
                     }
-
-
                     break;
                 case "invoice.payment.failed":
                     // Handle payment failure
@@ -241,8 +327,9 @@ public class BillingController : ControllerBase
                     }
                     break;
                 case "invoice.paid":
-                    Console.WriteLine("Invoice paid");
+                    Console.WriteLine("Invoice Paid Hit");
                     break;
+
                 default:
                     // Unhandled event type
                     Console.WriteLine($"Unhandled event type: {stripeEvent.Type}");
@@ -274,4 +361,30 @@ public class BillingController : ControllerBase
         }
     }
 
+
+    private async Task ApplyCurrentCycleEntitlementsAsync(ApplicationUser user, UserRole tier, DateTime periodStartUtc, DateTime periodEndUtc)
+    {
+        user.SubscriptionTier = tier;
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Role == tier);
+        if(product is not null)
+        {
+            user.MonthlyPostAllowance = product.PostAllowance;
+        }
+
+        user.PostsUsedThisPeriod = 0;
+        user.CurrentPeriodStartUtc = periodStartUtc;
+        user.CurrentPeriodEndUtc = periodEndUtc;
+
+        // Reflect current tier in roles for feature gating
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Any())
+            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+        await _userManager.AddToRoleAsync(user, tier.ToString());
+    }
+
+    private void SetNextCycleTierAsync(ApplicationUser user, UserRole nextTier)
+    {
+        user.EntitlementTierNext = nextTier;
+    }
 }

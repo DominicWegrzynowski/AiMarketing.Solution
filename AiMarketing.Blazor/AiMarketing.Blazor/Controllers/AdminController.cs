@@ -26,7 +26,6 @@ namespace AiMarketing.Blazor.Controllers
                 return Unauthorized("Invalid token");
             }
 
-            await _billingService.DowngradeExpiredUsersAsync();
             await _billingService.ResetTrialAllowancesAsync();
 
             return Ok("Monthly reset completed.");

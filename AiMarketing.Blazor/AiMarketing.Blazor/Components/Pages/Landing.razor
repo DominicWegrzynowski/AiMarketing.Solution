@@ -5,26 +5,358 @@
 @inject AuthenticationStateProvider AuthProvider
 @rendermode InteractiveServer
 
-<header class="bg-light text-center py-5">
-    <div class="container">
-        <h1 class="display-4">Welcome to Prompt-n-Post</h1>
-        <p class="lead">
-            Effortless social media content generation for your business. Set your voice, generate posts, and grow your brand—all in seconds.
+<!-- ================= HERO ================= -->
+<section class="bg-primary bg-gradient text-white py-5">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold">Create a month of social posts in seconds</h1>
+        <p class="lead mt-2 mb-4">
+            Set your brand voice, generate quality posts, and publish fast—without hiring a marketer.
         </p>
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+            <button class="btn btn-light btn-lg text-primary fw-semibold" @onclick="NavigateToRegister">
+                Get Started Free
+            </button>
+            <a href="#video" class="btn btn-outline-light btn-lg">Watch quick demo</a>
+        </div>
+        <div class="text-white-50 small mt-2">No credit card required • 3 free posts</div>
     </div>
-</header>
+</section>
 
-<div class="container text-center py-5">
-    <div class="mx-auto d-block text-center"
-         style="width: 100%; max-width: 640px; height: 360px; background-color: #ddd; margin-bottom: 2rem;">
-        <p style="line-height: 360px;">Video Coming Soon</p>
+<!-- ================= VIDEO ================= -->
+<section id="video" class="py-5 bg-body-tertiary">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="text-uppercase text-secondary fw-semibold small">See it in action</span>
+            <h2 class="fw-bold mt-1 mb-0">Quick walkthrough</h2>
+        </div>
+
+        <!-- 16:9 responsive player -->
+        <div class="ratio ratio-16x9 rounded-4 shadow mx-auto" style="max-width: 960px;">
+            <!-- Use either <video> with your mp4 OR a YouTube/Vimeo iframe -->
+            <video controls poster="/images/video-poster.jpg">
+                <source src="/videos/demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            @* Example iframe instead:
+      <iframe src="https://www.youtube.com/embed/xxxxxxxx" title="Prompt-n-Post Demo" allowfullscreen></iframe>
+      *@
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="#pricing" class="btn btn-primary btn-lg">Try it after the demo</a>
+        </div>
     </div>
+</section>
 
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how-it-works" class="py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="text-uppercase text-secondary fw-semibold small">Onboarding · Creation · Posting</span>
+            <h2 class="fw-bold mt-1 mb-0">How it works</h2>
+        </div>
 
-    <button @onclick="() => Navigate()" class=" btn btn-primary btn-lg mt-3">Get Started</button>
-</div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="/images/step-voice.jpg" class="card-img-top" alt="Set brand voice">
+                    <div class="card-body">
+                        <h5 class="card-title">Tell us about your business</h5>
+                        <p class="card-text text-secondary mb-0">
+                            Pick your industry and brand voice. We remember it for next time.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="/images/step-generate.jpg" class="card-img-top" alt="Generate posts">
+                    <div class="card-body">
+                        <h5 class="card-title">Generate posts instantly</h5>
+                        <p class="card-text text-secondary mb-0">
+                            One click → a batch of ready-to-use post ideas tailored to your voice.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="/images/step-post.jpg" class="card-img-top" alt="Edit and post">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">Edit, copy, and post</h5>
+                        <p class="card-text text-secondary">
+                            Tweak the text, hit <strong>Copy</strong>, then jump straight to Twitter, Instagram, Facebook, or LinkedIn.
+                        </p>
+                        <div class="mt-auto">
+                            <a href="#pricing" class="btn btn-outline-primary w-100">Start free</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= BENEFITS ================= -->
+<section class="py-5 bg-body-tertiary">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="text-uppercase text-secondary fw-semibold small">Why it matters</span>
+            <h2 class="fw-bold mt-1 mb-0">Why businesses use Prompt-n-Post</h2>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-4 g-4 text-center">
+            <div class="col">
+                <div class="h-100 p-4 border rounded-4 shadow-sm">
+                    <i class="bi bi-clock-history display-6 text-primary"></i>
+                    <h6 class="mt-2 mb-1">Save hours weekly</h6>
+                    <p class="text-secondary mb-0">Batch content in minutes—no more blank screens.</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="h-100 p-4 border rounded-4 shadow-sm">
+                    <i class="bi bi-brush display-6 text-primary"></i>
+                    <h6 class="mt-2 mb-1">Stay on brand</h6>
+                    <p class="text-secondary mb-0">Your voice and industry context are built in.</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="h-100 p-4 border rounded-4 shadow-sm">
+                    <i class="bi bi-rocket-takeoff display-6 text-primary"></i>
+                    <h6 class="mt-2 mb-1">Post faster</h6>
+                    <p class="text-secondary mb-0">One-click jump to your social apps after copy.</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="h-100 p-4 border rounded-4 shadow-sm">
+                    <i class="bi bi-stars display-6 text-primary"></i>
+                    <h6 class="mt-2 mb-1">Look professional</h6>
+                    <p class="text-secondary mb-0">Clean, consistent posts—especially on busy days.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= PRICING ================= -->
+<section id="pricing" class="py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="text-uppercase text-secondary fw-semibold small">Plans</span>
+            <h2 class="fw-bold mt-1 mb-0">Simple pricing</h2>
+            <div class="text-secondary">Start free. Upgrade when you’re ready.</div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4 align-items-stretch">
+            <!-- Starter -->
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-body-tertiary text-center fw-semibold">Starter</div>
+                    <div class="card-body text-center d-flex flex-column">
+                        <h3 class="fw-bold mb-0">$19.99</h3>
+                        <div class="text-secondary mb-3">No card required</div>
+                        <ul class="list-unstyled small text-start mx-auto mb-4" style="max-width:260px">
+                            <li>• 10 Posts/month</li>
+                            <li>• All core features</li>
+                            <li>• Brand voice saved</li>
+                        </ul>
+                        <div class="mt-auto">
+                            <button class="btn btn-outline-primary w-100" @onclick="NavigateToRegister">Get Started</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Growth (Most popular) -->
+            <div class="col">
+                <div class="card h-100 border-primary shadow">
+                    <div class="card-header bg-primary bg-gradient text-white text-center fw-semibold">
+                        Growth <span class="badge text-bg-light text-primary ms-2">Most popular</span>
+                    </div>
+                    <div class="card-body text-center d-flex flex-column">
+                        <h3 class="fw-bold mb-0">$39.99<span class="fs-6 text-secondary">/mo</span></h3>
+                        <div class="text-secondary mb-3">For consistent posting</div>
+                        <ul class="list-unstyled small text-start mx-auto mb-4" style="max-width:260px">
+                            <li>• 25 posts / month</li>
+                            <li>• All core features</li>
+                            <li>• Brand voice saved</li>
+                        </ul>
+                        <div class="mt-auto">
+                            <button class="btn btn-primary w-100" @onclick="NavigateToRegister">Upgrade</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro -->
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-body-tertiary text-center fw-semibold">Pro</div>
+                    <div class="card-body text-center d-flex flex-column">
+                        <h3 class="fw-bold mb-0">$59.99<span class="fs-6 text-secondary">/mo</span></h3>
+                        <div class="text-secondary mb-3">For active brands</div>
+                        <ul class="list-unstyled small text-start mx-auto mb-4" style="max-width:260px">
+                            <li>• 35 posts / month</li>
+                            <li>• All core features</li>
+                            <li>• Brand voice saved</li>
+                        </ul>
+                        <div class="mt-auto">
+                            <button class="btn btn-outline-primary w-100" @onclick="NavigateToRegister">Upgrade</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-secondary small mt-3 mb-0">Powered by Stripe • Cancel anytime</p>
+    </div>
+</section>
+
+<!-- ================= SOCIAL PROOF ================= -->
+<section class="py-5 bg-body-tertiary">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="text-uppercase text-secondary fw-semibold small">Social proof</span>
+            <h2 class="fw-bold mt-1 mb-0">What local businesses say</h2>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col">
+                <figure class="p-4 border rounded-4 shadow-sm h-100">
+                    <blockquote class="blockquote mb-1">
+                        <p>“This saves me 3–5 hours a week.”</p>
+                    </blockquote>
+                    <figcaption class="blockquote-footer mb-0">Knoxville café owner</figcaption>
+                </figure>
+            </div>
+            <div class="col">
+                <figure class="p-4 border rounded-4 shadow-sm h-100">
+                    <blockquote class="blockquote mb-1">
+                        <p>“Finally posting consistently.”</p>
+                    </blockquote>
+                    <figcaption class="blockquote-footer mb-0">Local fitness studio</figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- ================= FAQ ================= -->
+<section id="faq" class="py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="text-uppercase text-secondary fw-semibold small">Details</span>
+            <h2 class="fw-bold mt-1 mb-0">FAQ</h2>
+        </div>
+
+        <div class="accordion" id="faqAcc">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="q1">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a1">
+                        Who is this built for?
+                    </button>
+                </h2>
+                <div id="a1" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                    <div class="accordion-body">
+                        Local service businesses, cafés, gyms, salons, real estate, contractors, nonprofits—anyone who needs consistent, on-brand social posts without hiring a full-time marketer.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="q2">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a2">
+                        Which platforms does it work with?
+                    </button>
+                </h2>
+                <div id="a2" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                    <div class="accordion-body">
+                        Instagram, Facebook, X (Twitter), and LinkedIn. You can copy the content anywhere you post.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="q3">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a3">
+                        What makes this different from other AI content tools?
+                    </button>
+                </h2>
+                <div id="a3" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                    <div class="accordion-body">
+                        It’s tuned for small businesses: you set your business details and brand voice once, then get posts with clear hooks, CTAs, and hashtags that actually fit your niche—no generic fluff.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="q4">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a4">
+                        Will the posts match my brand voice?
+                    </button>
+                </h2>
+                <div id="a4" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                    <div class="accordion-body">
+                        Yes. Choose from multiple brand tones and add your own notes. Every post is editable, so you can tweak wording in seconds before you publish.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="q5">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a5">
+                        How fast can I generate content?
+                    </button>
+                </h2>
+                <div id="a5" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                    <div class="accordion-body">
+                        Most posts generate in a few seconds. Create a week’s worth of content in minutes instead of hours.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="q6">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a6">
+                        Do I own the content?
+                    </button>
+                </h2>
+                <div id="a6" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                    <div class="accordion-body">
+                        Yes. You have full rights to everything you generate and publish with your account.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="q9">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#a9">
+                        Can I cancel anytime?
+                    </button>
+                </h2>
+                <div id="a9" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                    <div class="accordion-body">
+                        Absolutely. Manage your subscription through the Stripe customer portal whenever you like.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section class="bg-primary bg-gradient text-white py-5">
+    <div class="container text-center">
+        <h3 class="fw-bold mb-3">Ready to post faster?</h3>
+        <button class="btn btn-light btn-lg text-primary fw-semibold" @onclick="NavigateToRegister">
+            Get Started Free
+        </button>
+        <div class="text-white-50 small mt-2">No credit card required • 3 free posts</div>
+    </div>
+</section>
 
 @code {
     protected override async Task OnInitializedAsync()
@@ -36,9 +368,5 @@
         }
     }
 
-    private void Navigate()
-    {
-
-        Navigation.NavigateTo("Account/Login");
-    }
+    private void NavigateToRegister() => Navigation.NavigateTo("/Account/Register");
 }

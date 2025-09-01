@@ -16,16 +16,27 @@ namespace AiMarketing.Blazor.Services.AllowanceService
             _productService = productService;
         }
 
+        // Helper: remaining = allowance - used
+        private static int Remaining(ApplicationUser u)
+            => Math.Max(0, (u.MonthlyPostAllowance) - (u.PostsUsedThisPeriod));
+
         public async Task<bool> CanGeneratePostsAsync(ApplicationUser user, int numberOfRequestedPosts)
         {
-            await RefreshAllowanceIfNeededAsync(user);
-
-            return user.MonthlyPostAllowance >= numberOfRequestedPosts;
+            // No automatic resets here; webhook drives period changes.
+            return Remaining(user) >= numberOfRequestedPosts;
         }
 
         public async Task DeductPostsAsync(ApplicationUser user, int numberOfPosts)
         {
-            user.MonthlyPostAllowance = Math.Max(0, user.MonthlyPostAllowance - numberOfPosts);
+            // Increment "used" rather than reducing allowance
+            var remaining = Remaining(user);
+            if (numberOfPosts <= 0 || remaining <= 0) return;
+
+            user.PostsUsedThisPeriod = Math.Min(
+                user.PostsUsedThisPeriod + numberOfPosts,
+                user.MonthlyPostAllowance
+            );
+
             await _userManager.UpdateAsync(user);
         }
 
@@ -39,22 +50,14 @@ namespace AiMarketing.Blazor.Services.AllowanceService
         {
             var roles = await _userManager.GetRolesAsync(user);
             var roleName = roles.FirstOrDefault() ?? nameof(UserRole.Trial);
-
             return Enum.TryParse<UserRole>(roleName, out var roleEnum) ? roleEnum : UserRole.Trial;
         }
 
-        public async Task RefreshAllowanceIfNeededAsync(ApplicationUser user)
+        // IMPORTANT: No silent monthly rollover here anymore (webhook handles it).
+        // Leave as a no-op so existing calls compile harmlessly.
+        public Task RefreshAllowanceIfNeededAsync(ApplicationUser user)
         {
-            if(DateTime.UtcNow > user.AllowanceEnd)
-            {
-                var role = await GetUserRoleAsync(user);
-
-                user.MonthlyPostAllowance = await GetAllowanceByRole(role);
-                user.AllowanceStart = DateTime.UtcNow;
-                user.AllowanceEnd = DateTime.UtcNow.AddMonths(1).AddDays(-1);
-
-                await _userManager.UpdateAsync(user);
-            }
+            return Task.CompletedTask;
         }
     }
 }
