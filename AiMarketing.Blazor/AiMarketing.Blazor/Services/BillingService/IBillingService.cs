@@ -9,5 +9,7 @@ namespace AiMarketing.Blazor.Services.BillingService
         Task<string?> CreatePortalSessionAsync(ClaimsPrincipal principal);
         Task CheckAndHandleSubscriptionExpirationAsync(ApplicationUser user);
         Task ResetTrialAllowancesAsync();
+        Task SyncSubscriptionFromStripe(ApplicationUser user);
+
     }
 }

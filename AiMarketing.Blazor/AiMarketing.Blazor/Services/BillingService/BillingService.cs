@@ -59,7 +59,32 @@ namespace AiMarketing.Blazor.Services.BillingService
             var product = await _context.Products.FirstOrDefaultAsync(p => p.StripeProductId == productId);
             if (product == null || string.IsNullOrEmpty(product.StripeProductId))
                 return null;
-            
+
+            if (!string.IsNullOrEmpty(user.StripeCustomerId))
+            {
+                var subService = new SubscriptionService();
+                var existingSubs = await subService.ListAsync(new SubscriptionListOptions
+                {
+                    Customer = user.StripeCustomerId,
+                    Status = "active",
+                    Limit = 1
+                });
+
+                if (existingSubs.Data.Count > 0)
+                {
+                    // Sync local DB if missing
+                    var sub = existingSubs.Data.First();
+                    if (string.IsNullOrEmpty(user.StripeSubscriptionId))
+                    {
+                        user.StripeSubscriptionId = sub.Id;
+                        await _userManager.UpdateAsync(user);
+                    }
+
+                    // You can also log or throw a specific flag so the UI knows to redirect to portal
+                    Console.WriteLine($"User {user.Email} already has an active subscription: {sub.Id}");
+                    return null; // signals "already subscribed"
+                }
+            }
 
             var session = await new SessionService().CreateAsync(new SessionCreateOptions
             {
@@ -139,5 +164,47 @@ namespace AiMarketing.Blazor.Services.BillingService
             //    await _context.SaveChangesAsync();
             //}
         }
+        public async Task SyncSubscriptionFromStripe(ApplicationUser user)
+        {
+            if (string.IsNullOrEmpty(user.StripeCustomerId))
+                return;
+
+            var subService = new SubscriptionService();
+            var subs = await subService.ListAsync(new SubscriptionListOptions
+            {
+                Customer = user.StripeCustomerId,
+                Status = "active",
+                Limit = 1
+            });
+
+            var active = subs.Data.FirstOrDefault();
+            if (active is null) return;
+
+            user.StripeSubscriptionId = active.Id;
+            user.SubscriptionStatus = active.Status;
+
+            var item = active.Items?.Data?.FirstOrDefault();
+            if (item != null)
+            {
+                var periodStart = item.CurrentPeriodStart;
+                var periodEnd = item.CurrentPeriodEnd;
+
+                user.CurrentPeriodStartUtc = periodStart;
+                user.CurrentPeriodEndUtc = periodEnd;
+
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.StripePriceId == item.Price.Id);
+
+                if (product is not null)
+                {
+                    user.SubscriptionTier = product.Role;
+                    user.MonthlyPostAllowance = product.PostAllowance;
+                }
+            }
+
+            await _userManager.UpdateAsync(user);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
