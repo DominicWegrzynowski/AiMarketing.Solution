@@ -70,12 +70,14 @@ var app = builder.Build();
 // Seed the roles during startup
 using (var scope = app.Services.CreateScope())
 {
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+
     var services = scope.ServiceProvider;
     var seedService = services.GetRequiredService<ISeedService>();
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
     await seedService.SeedRolesAsync();  // Seeding roles
-    await seedService.SeedProductsAsync(dbContext);  // Seeding products
+    await seedService.SeedProductsAsync(db);  // Seeding products
 }
 
 // Configure the HTTP request pipeline.
