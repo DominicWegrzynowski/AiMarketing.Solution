@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Security.Claims;
-using AiMarketing.Blazor.Client;
 using AiMarketing.Blazor.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using AiMarketing.Blazor.Models;
 
 namespace AiMarketing.Blazor.Components.Account
 {

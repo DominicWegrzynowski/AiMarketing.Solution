@@ -1,4 +1,3 @@
-using AiMarketing.Blazor.Client.Pages;
 using AiMarketing.Blazor.Components;
 using AiMarketing.Blazor.Components.Account;
 using AiMarketing.Blazor.Data;
@@ -103,8 +102,7 @@ app.MapControllers();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(AiMarketing.Blazor.Client._Imports).Assembly);
+    .AddInteractiveWebAssemblyRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
