@@ -156,11 +156,13 @@ else
         if (!string.IsNullOrEmpty(currentUser.StripeCustomerId) &&
              string.IsNullOrEmpty(currentUser.StripeSubscriptionId))
         {
+            Console.WriteLine("SyncSubscriptionFromStripe Called");
             await _billingService.SyncSubscriptionFromStripe(currentUser);
         }
 
         if (!string.IsNullOrEmpty(currentUser.StripeCustomerId) && !string.IsNullOrEmpty(currentUser.StripeSubscriptionId))
         {
+            Console.WriteLine("Launch Portal Called");
             flagHasMembership = true;
             StateHasChanged();
             await LaunchPortal();
@@ -188,6 +190,7 @@ else
 
             if(url is null)
             {
+                Console.WriteLine("URL is null");
                 // user already subscribed -> send them to portal instead
                 await LaunchPortal();
                 return;
