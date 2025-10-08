@@ -24,16 +24,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-
-        <script src="_framework/blazor.web.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        // Smooth scroll helper
-        window.scrollToTop = () => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
         // === UNIVERSAL COPY FUNCTION ===
         window.copyToClipboard = async function (text) {
           try {
@@ -111,6 +101,37 @@
             return false;
           }
         };
+
+        document.addEventListener("DOMContentLoaded", () => {
+          // Attach iOS handler to all copy buttons
+          document.querySelectorAll("[data-copy-text]").forEach(btn => {
+            btn.addEventListener("touchstart", () => {
+              if (!/iPad|iPhone|iPod/.test(navigator.userAgent)) return;
+
+              try {
+                const text = btn.getAttribute("data-copy-text");
+                const input = document.createElement("input");
+                input.value = text;
+                input.style.position = "absolute";
+                input.style.opacity = "0";
+                document.body.appendChild(input);
+
+                input.focus();
+                input.select();
+                const success = document.execCommand("copy");
+                document.body.removeChild(input);
+
+                if (success) {
+                  alert("✅ iOS copy success!");
+                } else {
+                  alert("❌ iOS copy blocked by Safari.");
+                }
+              } catch (err) {
+                alert("❌ iOS copy error: " + err);
+              }
+            });
+          });
+        });
 
     </script>
 

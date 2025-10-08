@@ -94,7 +94,7 @@
                     <button class="btn btn-warning" title="Edit post" @onclick="StartEdit">
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-success" title="Copy post" @onclick="CopyToClipboard">
+                    <button class="btn btn-success" title="Copy post" @onclick="CopyToClipboard" data-copy-text="@Post.Content">
                         <i class="bi bi-copy"></i>
                     </button>
                 </div>
