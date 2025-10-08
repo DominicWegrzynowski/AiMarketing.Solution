@@ -25,44 +25,55 @@
         };
 
 
-        window.copyToClipboard = async function (text) {
-        try {
+                window.copyToClipboard = function (text) {
+          try {
+            // 1️⃣ Try modern clipboard API first
             if (navigator.clipboard && window.isSecureContext) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    alert("Copied via secure clipboard API");
-                    return true;
-                } catch (err) {
-                    alert("Secure copy failed, falling back:", err);
-                }
+              alert("Attempting secure copy...");
+              return navigator.clipboard.writeText(text)
+                .then(() => {
+                  alert("✅ Copied via secure clipboard API!");
+                  return true;
+                })
+                .catch(err => {
+                  alert("❌ Secure copy failed, falling back: " + err);
+                  return fallbackCopy(text);
+                });
+            } else {
+              alert("⚙️ Secure clipboard not available, using fallback...");
+              return fallbackCopy(text);
             }
-
-            // Fallback for Safari/iOS
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.setAttribute("readonly", "");
-            textArea.style.position = "absolute";
-            textArea.style.left = "-9999px";
-            document.body.appendChild(textArea);
-
-            const selection = document.getSelection();
-            const originalRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-            textArea.select();
-
-            const successful = document.execCommand("copy");
-            if (originalRange) {
-                selection.removeAllRanges();
-                selection.addRange(originalRange);
-            }
-
-            document.body.removeChild(textArea);
-            alert("Copied via fallback:", successful);
-            return successful;
-        } catch (err) {
-            alert("Clipboard copy failed:", err);
+          } catch (err) {
+            alert("❌ Clipboard copy failed (outer catch): " + err);
             return false;
+          }
+        };
+
+        function fallbackCopy(text) {
+          alert("📋 Fallback copy started");
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          textArea.style.position = "fixed";
+          textArea.style.top = "0";
+          textArea.style.left = "0";
+          textArea.style.opacity = "0";
+          document.body.appendChild(textArea);
+
+          textArea.focus({ preventScroll: true });
+          textArea.select();
+
+          let success = false;
+          try {
+            success = document.execCommand('copy');
+            alert(success ? "✅ Copied via fallback!" : "❌ execCommand returned false");
+          } catch (e) {
+            alert("❌ execCommand error: " + e);
+            success = false;
+          }
+
+          document.body.removeChild(textArea);
+          return success;
         }
-    };
 
     </script>
 
