@@ -86,28 +86,28 @@
         window.isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         // === DIRECT COPY FOR SAFARI / iOS ===
-                window.directCopy = function (text) {
+        window.directCopy = function (text) {
           try {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.opacity = "0";
-            document.body.appendChild(textArea);
+            // Create the hidden input
+            const input = document.createElement("input");
+            input.value = text;
+            input.setAttribute("readonly", "");
+            input.style.position = "absolute";
+            input.style.left = "-9999px";
+            document.body.appendChild(input);
 
-            // The magic sauce for iOS Safari
-            textArea.focus();
-            textArea.select();
-            textArea.setSelectionRange(0, textArea.value.length);
+            // Focus + select synchronously
+            input.focus();
+            input.select();
 
+            // iOS-safe synchronous copy attempt
             const success = document.execCommand("copy");
-            document.body.removeChild(textArea);
+            document.body.removeChild(input);
 
-            alert(success ? "✅ iOS direct copy succeeded!" : "❌ iOS direct copy failed (still)");
+            alert(success ? "✅ iOS hard-copy succeeded!" : "❌ iOS still failed");
             return success;
           } catch (e) {
-            alert("❌ directCopy exception: " + e);
+            alert("❌ iOS copy exception: " + e);
             return false;
           }
         };
