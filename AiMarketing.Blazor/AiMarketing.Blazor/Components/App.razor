@@ -39,6 +39,23 @@
           input.setAttribute("readonly", "");
           window.getSelection().removeAllRanges();
         }
+
+        function resizeAllTextareas() {
+          document.querySelectorAll("textarea[readonly]").forEach(textarea => {
+            textarea.style.height = "auto";
+            textarea.style.height = textarea.scrollHeight + "px";
+          });
+        }
+
+        // Run once when DOM is ready
+        document.addEventListener("DOMContentLoaded", resizeAllTextareas);
+
+        // Re-run after Blazor updates (important!)
+        document.addEventListener("readystatechange", resizeAllTextareas);
+
+        // Optional: handle dynamically inserted textareas (e.g., Blazor rerenders)
+        new MutationObserver(() => resizeAllTextareas())
+          .observe(document.body, { childList: true, subtree: true });
     </script>
 
 </body>
