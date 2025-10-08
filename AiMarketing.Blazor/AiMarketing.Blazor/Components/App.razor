@@ -25,32 +25,29 @@
         };
 
 
-                window.copyToClipboard = function (text) {
+        window.copyToClipboard = async function (text) {
           try {
-            // 1️⃣ Try modern clipboard API first
-            if (navigator.clipboard && window.isSecureContext) {
-              alert("Attempting secure copy...");
-              return navigator.clipboard.writeText(text)
-                .then(() => {
-                  alert("✅ Copied via secure clipboard API!");
-                  return true;
-                })
-                .catch(err => {
-                  alert("❌ Secure copy failed, falling back: " + err);
-                  return fallbackCopy(text);
-                });
+            // Use modern API first if document is focused
+            if (navigator.clipboard && window.isSecureContext && document.hasFocus()) {
+              try {
+                await navigator.clipboard.writeText(text);
+                alert("✅ Copied via secure clipboard API");
+                return true;
+              } catch (err) {
+                alert("⚠️ Secure copy failed:", err);
+                return fallbackCopy(text);
+              }
             } else {
-              alert("⚙️ Secure clipboard not available, using fallback...");
+              // Document not focused or secure context missing
               return fallbackCopy(text);
             }
           } catch (err) {
-            alert("❌ Clipboard copy failed (outer catch): " + err);
+            alert("❌ Clipboard copy failed:", err);
             return false;
           }
         };
 
         function fallbackCopy(text) {
-          alert("📋 Fallback copy started");
           const textArea = document.createElement("textarea");
           textArea.value = text;
           textArea.style.position = "fixed";
@@ -64,16 +61,17 @@
 
           let success = false;
           try {
-            success = document.execCommand('copy');
+            success = document.execCommand("copy");
             alert(success ? "✅ Copied via fallback!" : "❌ execCommand returned false");
           } catch (e) {
-            alert("❌ execCommand error: " + e);
-            success = false;
+            alert("❌ execCommand error:", e);
           }
 
           document.body.removeChild(textArea);
           return success;
         }
+
+        window.isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     </script>
 

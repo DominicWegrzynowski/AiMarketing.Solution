@@ -36,8 +36,20 @@
     {
         try
         {
-            bool success = await JS.InvokeAsync<bool>("copyToClipboard", Post.Content);
-            copySuccess = success;
+            bool isIOS = await JS.InvokeAsync<bool>("isIOS");
+
+            if (isIOS)
+            {
+                // Direct copy for Safari/iOS
+                await JS.InvokeVoidAsync("directCopy", Post.Content);
+                copySuccess = true;
+            }
+            else
+            {
+                // Standard async clipboard API
+                bool success = await JS.InvokeAsync<bool>("copyToClipboard", Post.Content);
+                copySuccess = success;
+            }
 
             StateHasChanged();
             await Task.Delay(2000);
@@ -49,6 +61,7 @@
             Console.WriteLine($"Clipboard error: {ex.Message}");
         }
     }
+
 
 
     private void StartEdit() => isEditing = true;
