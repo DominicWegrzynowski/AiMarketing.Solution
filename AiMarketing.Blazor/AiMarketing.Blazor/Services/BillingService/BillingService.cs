@@ -60,6 +60,7 @@ namespace AiMarketing.Blazor.Services.BillingService
             var product = await _context.Products.FirstOrDefaultAsync(p => p.StripeProductId == productId);
             if (product == null || string.IsNullOrEmpty(product.StripeProductId))
             {
+                Console.WriteLine($"Product: {product}, product.StripeProductId: {product!.StripeProductId}");
                 Console.WriteLine("product is null or product.stripeproductid is null or empty");
                 return null;
             }
