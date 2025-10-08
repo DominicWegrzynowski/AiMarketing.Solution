@@ -1,4 +1,7 @@
 ﻿@page "/manage-membership"
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
 @inject NavigationManager _navigationManager
 @inject IBillingService _billingService
 @inject UserManager<ApplicationUser> _userManager
