@@ -36,8 +36,9 @@
     {
         try
         {
-            await JS.InvokeVoidAsync("navigator.clipboard.writeText", Post.Content);
-            copySuccess = true;
+            bool success = await JS.InvokeAsync<bool>("copyToClipboard", Post.Content);
+            copySuccess = success;
+
             StateHasChanged();
             await Task.Delay(2000);
             copySuccess = false;
