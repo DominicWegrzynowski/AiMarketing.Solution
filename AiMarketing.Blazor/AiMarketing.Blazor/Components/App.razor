@@ -86,7 +86,7 @@
         window.isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         // === DIRECT COPY FOR SAFARI / iOS ===
-        window.directCopy = function (text) {
+                window.directCopy = function (text) {
           try {
             const textArea = document.createElement("textarea");
             textArea.value = text;
@@ -96,16 +96,18 @@
             textArea.style.opacity = "0";
             document.body.appendChild(textArea);
 
-            textArea.focus({ preventScroll: true });
+            // The magic sauce for iOS Safari
+            textArea.focus();
             textArea.select();
+            textArea.setSelectionRange(0, textArea.value.length);
 
             const success = document.execCommand("copy");
             document.body.removeChild(textArea);
 
-            alert(success ? "✅ iOS direct copy succeeded!" : "❌ iOS direct copy failed");
+            alert(success ? "✅ iOS direct copy succeeded!" : "❌ iOS direct copy failed (still)");
             return success;
           } catch (e) {
-            alert("❌ directCopy error: " + e);
+            alert("❌ directCopy exception: " + e);
             return false;
           }
         };
