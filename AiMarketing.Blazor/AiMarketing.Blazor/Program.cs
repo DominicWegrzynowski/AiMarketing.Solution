@@ -109,4 +109,10 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Remove("Content-Security-Policy");
+    await next();
+});
+
 app.Run();
