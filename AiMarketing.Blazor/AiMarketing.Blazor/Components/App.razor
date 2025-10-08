@@ -19,11 +19,40 @@
     <Routes />
     <script src="_framework/blazor.web.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js"></script>
     <script>
         window.scrollToTop = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
+
+
+        window.copyToClipboard = async function (text) {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                alert('DESKTOP HIT');
+                await navigator.clipboard.writeText(text);
+                return true;
+            } else {
+                alert('MOBILE HIT');
+                // Mobile / insecure context fallback
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                const success = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return success;
+            }
+        } catch (err) {
+            alert('Clipboard copy failed:', err);
+            console.error('Clipboard copy failed:', err);
+            return false;
+        }
+        };
+
     </script>
 
 </body>
