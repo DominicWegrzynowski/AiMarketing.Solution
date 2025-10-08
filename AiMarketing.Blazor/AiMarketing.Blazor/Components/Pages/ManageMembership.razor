@@ -192,9 +192,9 @@ else
 
             ErrorMessage = "Failed to create checkout session.";
         }
-        catch
+        catch(Exception ex)
         {
-            ErrorMessage = "Something went wrong. Please try again.";
+            ErrorMessage = "Something went wrong. Please try again." + ex;
         }
         finally
         {
