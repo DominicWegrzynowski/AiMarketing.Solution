@@ -52,16 +52,22 @@ namespace AiMarketing.Blazor.Services.BillingService
 
                 user.StripeCustomerId = customer.Id;
                 await _userManager.UpdateAsync(user);
+                Console.WriteLine("customer created");
             }
 
             var domain = _config["App:Domain"] ?? "https://localhost:7078";
 
             var product = await _context.Products.FirstOrDefaultAsync(p => p.StripeProductId == productId);
             if (product == null || string.IsNullOrEmpty(product.StripeProductId))
+            {
+                Console.WriteLine("product is null or product.stripeproductid is null or empty");
                 return null;
+            }
+                
 
             if (!string.IsNullOrEmpty(user.StripeCustomerId))
             {
+                Console.WriteLine("user.StripeCustomerId is not null");
                 var subService = new SubscriptionService();
                 var existingSubs = await subService.ListAsync(new SubscriptionListOptions
                 {
@@ -72,10 +78,12 @@ namespace AiMarketing.Blazor.Services.BillingService
 
                 if (existingSubs.Data.Count > 0)
                 {
+                    Console.WriteLine("existingSubs.Data.Count > 0");
                     // Sync local DB if missing
                     var sub = existingSubs.Data.First();
                     if (string.IsNullOrEmpty(user.StripeSubscriptionId))
                     {
+                        Console.WriteLine("user.StripeSubscriptionId is null or empty, " + sub.Id + " assigned to StripeSubscriptionId");
                         user.StripeSubscriptionId = sub.Id;
                         await _userManager.UpdateAsync(user);
                     }
