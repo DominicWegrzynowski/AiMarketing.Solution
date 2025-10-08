@@ -3,6 +3,7 @@
 @inject IBillingService _billingService
 @inject UserManager<ApplicationUser> _userManager
 @inject AuthenticationStateProvider _auth
+@inject IConfiguration Configuration
 @rendermode InteractiveServer
 
 @if(flagHasMembership != true)
@@ -132,12 +133,16 @@ else
     private bool flagHasMembership = false;
     private string? _loadingProductId;
     private ApplicationUser? currentUser;
-    private string starterStripeProductId = "prod_Si7rDlk5pcJevG";
-    private string growthStripeProductId = "prod_SivvOzB2QScRA0";
-    private string proStripeProductId = "prod_Sivxg5HOqrDjeS";
+    private string starterStripeProductId = "";
+    private string growthStripeProductId = "";
+    private string proStripeProductId = "";
 
     protected override async Task OnInitializedAsync()
     {
+        starterStripeProductId = Configuration.GetValue<string>("Stripe:StarterProductId")!;
+        growthStripeProductId = Configuration.GetValue<string>("Stripe:GrowthProductId")!;
+        proStripeProductId = Configuration.GetValue<string>("Stripe:ProProductId")!;
+
         var authState = await _auth.GetAuthenticationStateAsync();
         var user = await _userManager.GetUserAsync(authState.User);
 

@@ -96,7 +96,7 @@
                       type="text"
                       value="@Post.Content"
                       readonly>@Post.Content</textarea> *@
-    <textarea readonly
+                <textarea readonly
                       type="text"
                       value="@Post.Content"
                       id="copy_@Post.Id"
@@ -117,11 +117,6 @@
             word-wrap:break-word;
           ">@Post.Content</textarea>
 
-
-
-
-
-
                 <p class="text-muted"><strong>Image Recommendation:</strong> @Post.ImageRecommendation</p>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2 mt-auto">
@@ -132,11 +127,6 @@
                         <i class="bi bi-pencil-square"></i>
                     </button>
                     <div class="input-group mb-2">
-                        @* <input id="copy_@Post.Id"
-                               class="form-control"
-                               type="text"
-                               value="@Post.Content"
-                               readonly> *@
                         <button class="btn btn-success"
                                 type="button"
                                 onclick="copyIOSSafe('copy_@Post.Id')">
