@@ -25,44 +25,44 @@
         };
 
 
-                window.copyToClipboard = async function (text) {
-            try {
-                if (navigator.clipboard && window.isSecureContext) {
-                    try {
-                        await navigator.clipboard.writeText(text);
-                        console.log("Copied via secure clipboard API");
-                        return true;
-                    } catch (err) {
-                        console.warn("Secure copy failed, falling back:", err);
-                    }
+        window.copyToClipboard = async function (text) {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    alert("Copied via secure clipboard API");
+                    return true;
+                } catch (err) {
+                    alert("Secure copy failed, falling back:", err);
                 }
-
-                // Fallback for Safari/iOS
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.setAttribute("readonly", "");
-                textArea.style.position = "absolute";
-                textArea.style.left = "-9999px";
-                document.body.appendChild(textArea);
-
-                const selection = document.getSelection();
-                const originalRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-                textArea.select();
-
-                const successful = document.execCommand("copy");
-                if (originalRange) {
-                    selection.removeAllRanges();
-                    selection.addRange(originalRange);
-                }
-
-                document.body.removeChild(textArea);
-                console.log("Copied via fallback:", successful);
-                return successful;
-            } catch (err) {
-                console.error("Clipboard copy failed:", err);
-                return false;
             }
-        };
+
+            // Fallback for Safari/iOS
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.setAttribute("readonly", "");
+            textArea.style.position = "absolute";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+
+            const selection = document.getSelection();
+            const originalRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+            textArea.select();
+
+            const successful = document.execCommand("copy");
+            if (originalRange) {
+                selection.removeAllRanges();
+                selection.addRange(originalRange);
+            }
+
+            document.body.removeChild(textArea);
+            alert("Copied via fallback:", successful);
+            return successful;
+        } catch (err) {
+            alert("Clipboard copy failed:", err);
+            return false;
+        }
+    };
 
     </script>
 
