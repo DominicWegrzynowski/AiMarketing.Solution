@@ -10,10 +10,12 @@ namespace AiMarketing.Blazor.Services.SeedService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public SeedService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly IConfiguration _config;
+        public SeedService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _config = config;
         }
         public async Task SeedRolesAsync()
         {
@@ -50,22 +52,22 @@ namespace AiMarketing.Blazor.Services.SeedService
                               DisplayName = "Starter", 
                               Price = 19.99m, 
                               PostAllowance = 10,
-                              StripeProductId = "prod_Si7rDlk5pcJevG",
-                              StripePriceId = "price_1RmhbwPvJwmnZe9m2Ofc1ELl"
+                              StripeProductId = _config.GetValue<string>("Stripe:StarterProductId")!,
+                              StripePriceId = _config.GetValue<string>("Stripe:StarterPriceId")!
                 },
                 new Product { Role = UserRole.Growth,
                               DisplayName = "Growth",
                               Price = 39.99m,
                               PostAllowance = 25,
-                              StripeProductId = "prod_SivvOzB2QScRA0",
-                              StripePriceId = "price_1RnU42PvJwmnZe9my3Un6MPT"
+                              StripeProductId = _config.GetValue<string>("Stripe:GrowthProductId")!,
+                              StripePriceId = _config.GetValue<string>("Stripe:GrowthPriceId")!
                 },
                 new Product { Role = UserRole.Pro,
                               DisplayName = "Pro",
                               Price = 59.99m,
                               PostAllowance = 35,
-                              StripeProductId = "prod_Sivxg5HOqrDjeS",
-                              StripePriceId = "price_1RnU5BPvJwmnZe9mzMxHfxlD"
+                              StripeProductId = _config.GetValue<string>("Stripe:ProProductId")!,
+                              StripePriceId = _config.GetValue<string>("Stripe:ProPriceId")!
                 }
             };
 
