@@ -32,37 +32,44 @@
         }
     }
 
-    private async Task CopyToClipboard()
+    // private async Task CopyToClipboard()
+    // {
+    //     try
+    //     {
+    //         bool isIOS = await JS.InvokeAsync<bool>("isIOS");
+
+    //         if (isIOS)
+    //         {
+    //             // Direct copy for Safari/iOS
+    //             await JS.InvokeVoidAsync("directCopy", Post.Content);
+    //             copySuccess = true;
+    //         }
+    //         else
+    //         {
+    //             // Standard async clipboard API
+    //             bool success = await JS.InvokeAsync<bool>("copyToClipboard", Post.Content);
+    //             copySuccess = success;
+    //         }
+
+    //         StateHasChanged();
+    //         await Task.Delay(2000);
+    //         copySuccess = false;
+    //         StateHasChanged();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Clipboard error: {ex.Message}");
+    //     }
+    // }
+
+    private async Task ShowCopiedFeedback()
     {
-        try
-        {
-            bool isIOS = await JS.InvokeAsync<bool>("isIOS");
-
-            if (isIOS)
-            {
-                // Direct copy for Safari/iOS
-                await JS.InvokeVoidAsync("directCopy", Post.Content);
-                copySuccess = true;
-            }
-            else
-            {
-                // Standard async clipboard API
-                bool success = await JS.InvokeAsync<bool>("copyToClipboard", Post.Content);
-                copySuccess = success;
-            }
-
-            StateHasChanged();
-            await Task.Delay(2000);
-            copySuccess = false;
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Clipboard error: {ex.Message}");
-        }
+        copySuccess = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        copySuccess = false;
+        StateHasChanged();
     }
-
-
 
     private void StartEdit() => isEditing = true;
     private void CancelEdit() => isEditing = false;
@@ -94,9 +101,14 @@
                     <button class="btn btn-warning" title="Edit post" @onclick="StartEdit">
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button class="btn btn-success" title="Copy post" @onclick="CopyToClipboard" data-copy-text="@Post.Content">
-                        <i class="bi bi-copy"></i>
+                    <button class="btn btn-success"
+                            title="Copy post"
+                            type="button"
+                            data-copy-text="@tempContent"
+                            onclick="Clipboard.copy(this.getAttribute('data-copy-text'))">
+                        <i class="bi bi-copy"></i> Copy
                     </button>
+
                 </div>
 
                 <!-- separator only on md+ -->
