@@ -67,6 +67,10 @@
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <div class="form-floating mt-3">
+                <a class="w-100 btn btn-lg btn-primary" 
+                    href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Already have an account? Login</a>
+            </div>
         </EditForm>
     </div>
 </div>

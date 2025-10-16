@@ -16,14 +16,19 @@
             <button class="btn btn-light btn-lg text-primary fw-semibold" @onclick="NavigateToRegister">
                 Get Started Free
             </button>
-            <a href="#video" class="btn btn-outline-light btn-lg">Watch quick demo</a>
+            <a href="#video" class="btn btn-light btn-lg text-primary fw-semibold">Watch Quick Demo</a>
+        </div>
+        <div class="d-flex justify-content-center mt-3">
+            <button class="btn btn-light btn-lg text-primary fw-semibold" @onclick="NavigateToLogin">
+                Returning User? Log In
+            </button>
         </div>
         <div class="text-white-50 small mt-2">No credit card required • 3 free posts</div>
     </div>
 </section>
 
 <!-- ================= VIDEO ================= -->
-<section id="video" class="py-5 bg-body-tertiary">
+@* <section id="video" class="py-5 bg-body-tertiary">
     <div class="container">
         <div class="text-center mb-4">
             <span class="text-uppercase text-secondary fw-semibold small">See it in action</span>
@@ -36,17 +41,14 @@
             <video controls poster="/images/video-poster.jpg">
                 <source src="/videos/demo.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
-            </video>
-            @* Example iframe instead:
-      <iframe src="https://www.youtube.com/embed/xxxxxxxx" title="Prompt-n-Post Demo" allowfullscreen></iframe>
-      *@
+            </video>      
         </div>
 
         <div class="text-center mt-3">
             <a href="#pricing" class="btn btn-primary btn-lg">Try it after the demo</a>
         </div>
     </div>
-</section>
+</section> *@
 
 <!-- ================= HOW IT WORKS ================= -->
 <section id="how-it-works" class="py-5">
@@ -369,4 +371,6 @@
     }
 
     private void NavigateToRegister() => Navigation.NavigateTo("/Account/Register");
+    private void NavigateToLogin() => Navigation.NavigateTo("/Account/Login");
+
 }
