@@ -56,6 +56,15 @@
         // Optional: handle dynamically inserted textareas (e.g., Blazor rerenders)
         new MutationObserver(() => resizeAllTextareas())
           .observe(document.body, { childList: true, subtree: true });
+
+
+        // Don't show reconnect error
+        window.Blazor.start({
+            reconnectionOptions: {
+                maxRetries: Infinity,
+                retryIntervalMilliseconds: 5000
+            }
+        });
     </script>
 
 </body>
