@@ -1,0 +1,70 @@
+﻿@page "/privacy"
+@using AiMarketing.Blazor.Components.Layout
+@layout MainLayout
+
+<section class="py-5">
+    <div class="container" style="max-width: 800px;">
+        <h1 class="fw-bold mb-4">Privacy Policy</h1>
+        <p class="text-secondary">Last updated: @DateTime.UtcNow.ToString("MMMM d, yyyy")</p>
+
+        <p>Prompt-n-Post (“we,” “our,” or “us”) operates the website <strong>https://prompt-n-post.com</strong> (the “Service”). This Privacy Policy explains how we collect, use, and protect your information when you use our Service.</p>
+
+        <h4 class="mt-4">1. Information We Collect</h4>
+        <p>We collect the following types of information to provide and improve our Service:</p>
+        <ul>
+            <li><strong>Account Information:</strong> When you register, we collect your name, email address, and password.</li>
+            <li><strong>Business Information:</strong> Information you provide about your business (industry, description, brand voice, etc.) for generating content.</li>
+            <li><strong>Usage Data:</strong> Non-identifiable data such as browser type, device information, pages visited, and actions within the app.</li>
+            <li><strong>Payment Information:</strong> Payments are securely processed by <strong>Stripe</strong>. We do not store credit card numbers or billing data on our servers.</li>
+        </ul>
+
+        <h4 class="mt-4">2. How We Use Your Information</h4>
+        <p>We use the information we collect to:</p>
+        <ul>
+            <li>Provide, maintain, and improve the Service;</li>
+            <li>Generate AI-powered social media content tailored to your business;</li>
+            <li>Communicate with you about your account, updates, and new features;</li>
+            <li>Process payments and manage subscriptions;</li>
+            <li>Comply with legal obligations and prevent fraudulent activity.</li>
+        </ul>
+
+        <h4 class="mt-4">3. How We Protect Your Data</h4>
+        <p>We use industry-standard encryption (HTTPS/SSL) and secure authentication to protect your data. Access to your account data is restricted to authorized personnel only. While we take reasonable measures to protect your information, no online service is completely risk-free.</p>
+
+        <h4 class="mt-4">4. Data Retention</h4>
+        <p>We retain your data for as long as your account is active or as needed to provide our Service. You can request deletion of your account and associated data at any time by contacting us.</p>
+
+        <h4 class="mt-4">5. Sharing of Information</h4>
+        <p>We do not sell your personal data. We may share limited information with trusted third parties that help us operate our Service, including:</p>
+        <ul>
+            <li><strong>Stripe</strong> – payment processing</li>
+            <li><strong>OpenAI</strong> – AI text generation (only business descriptions and prompts you provide)</li>
+            <li><strong>SendGrid</strong> – email delivery</li>
+        </ul>
+        <p>These partners are bound by confidentiality and data-protection agreements.</p>
+
+        <h4 class="mt-4">6. Your Rights</h4>
+        <p>You may:</p>
+        <ul>
+            <li>Access or update your account information;</li>
+            <li>Request deletion of your account;</li>
+            <li>Opt out of non-essential email communications.</li>
+        </ul>
+
+        <h4 class="mt-4">7. Cookies and Tracking</h4>
+        <p>We use cookies only for authentication and essential functionality (such as remembering login sessions). We do not use third-party advertising or tracking cookies.</p>
+
+        <h4 class="mt-4">8. Children’s Privacy</h4>
+        <p>Our Service is not directed to individuals under the age of 16. We do not knowingly collect personal information from minors.</p>
+
+        <h4 class="mt-4">9. Changes to This Policy</h4>
+        <p>We may update this Privacy Policy periodically. The latest version will always be available on this page. Continued use of the Service after any changes constitutes acceptance of the updated policy.</p>
+
+        <h4 class="mt-4">10. Contact Us</h4>
+        <p>If you have any questions or requests regarding this Privacy Policy, contact us at:</p>
+        <p>
+            <strong>Email:</strong> admin@prompt-n-post.com<br />
+            <strong>Address:</strong> Knoxville, TN, USA
+        </p>
+    </div>
+</section>

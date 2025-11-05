@@ -1,13 +1,38 @@
 ﻿@inherits LayoutComponentBase
 
-<NavMenu />
+<div class="d-flex flex-column min-vh-100">
+    <NavMenu />
 
-<div class="container my-5">
-    @Body
+    <main class="flex-fill">
+        <div class="container my-5">
+            @Body
+        </div>
+    </main>
+
+    <footer class="bg-white border-top py-4 mt-auto">
+        <div class="container text-center text-secondary small">
+            <div class="mb-2">
+                <a href="https://x.com/PromptNPost" target="_blank" rel="noopener"
+                   class="text-secondary text-decoration-none me-3">
+                    <i class="bi bi-twitter-x me-1"></i>
+                </a>
+                <a href="https://instagram.com/promptnpost" target="_blank" rel="noopener"
+                   class="text-secondary text-decoration-none me-3">
+                    <i class="bi bi-instagram me-1"></i>
+                </a>
+                <a href="/contact" class="text-secondary text-decoration-none me-3">
+                    Contact
+                </a>
+                <a href="/privacy" class="text-secondary text-decoration-none me-3">
+                    Privacy Policy
+                </a>
+                <a href="/terms" class="text-secondary text-decoration-none">
+                    Terms of Service
+                </a>
+            </div>
+            <div>
+                <span>&copy; @DateTime.UtcNow.Year Prompt-n-Post. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
 </div>
-
-@* <div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div> *@

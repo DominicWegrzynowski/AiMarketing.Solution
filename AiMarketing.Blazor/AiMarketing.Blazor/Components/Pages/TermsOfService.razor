@@ -1,0 +1,70 @@
+﻿@page "/terms"
+@using AiMarketing.Blazor.Components.Layout
+@layout MainLayout
+
+<section class="py-5">
+    <div class="container" style="max-width: 800px;">
+        <h1 class="fw-bold mb-4">Terms of Service</h1>
+        <p class="text-secondary">Last updated: @DateTime.UtcNow.ToString("MMMM d, yyyy")</p>
+
+        <p>Welcome to Prompt-n-Post (“we,” “our,” or “us”). By accessing or using our website (<strong>https://prompt-n-post.com</strong>) and related services (collectively, the “Service”), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
+
+        <h4 class="mt-4">1. Overview</h4>
+        <p>Prompt-n-Post is an AI-powered content generation platform designed to help small businesses create social media posts efficiently. These Terms govern your access to and use of the Service, including any content, functionality, or paid subscriptions offered through it.</p>
+
+        <h4 class="mt-4">2. Eligibility</h4>
+        <p>You must be at least 18 years old to use Prompt-n-Post. By using our Service, you represent that you meet this requirement and that all information you provide is accurate and current.</p>
+
+        <h4 class="mt-4">3. Account Registration</h4>
+        <p>You must create an account to access certain features. You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account. Notify us immediately at <strong>admin@prompt-n-post.com</strong> if you suspect unauthorized access.</p>
+
+        <h4 class="mt-4">4. Subscriptions and Billing</h4>
+        <ul>
+            <li>All paid plans are managed securely through <strong>Stripe</strong>.</li>
+            <li>Subscriptions renew automatically each month unless canceled.</li>
+            <li>You may cancel anytime from your account or via the Stripe customer portal.</li>
+            <li><strong>No refunds</strong> are issued for partial months or unused time. Upon cancellation, your subscription remains active until the end of the current billing period, after which it will not renew.</li>
+        </ul>
+
+        <h4 class="mt-4">5. Generated Content Ownership</h4>
+        <p>All text content generated through Prompt-n-Post is owned by you. You may edit, publish, or distribute it freely. We claim no ownership over user-generated or AI-generated content.</p>
+        <p>You are solely responsible for ensuring that your use of generated content complies with applicable laws, platform policies (e.g., Meta, X, Instagram, LinkedIn), and intellectual property rights.</p>
+
+        <h4 class="mt-4">6. Acceptable Use</h4>
+        <p>You agree not to use Prompt-n-Post to:</p>
+        <ul>
+            <li>Generate or distribute content that is unlawful, defamatory, hateful, or misleading;</li>
+            <li>Violate the rights or privacy of others;</li>
+            <li>Attempt to interfere with or disrupt the Service;</li>
+            <li>Reverse engineer, copy, or resell the Service or its components.</li>
+        </ul>
+        <p>We reserve the right to suspend or terminate accounts that violate these conditions.</p>
+
+        <h4 class="mt-4">7. Data and Privacy</h4>
+        <p>By using the Service, you agree to our <a href="/privacy" class="text-primary text-decoration-none">Privacy Policy</a>. We process limited personal and business data necessary to operate the platform, and we never sell user data.</p>
+
+        <h4 class="mt-4">8. AI Output Disclaimer</h4>
+        <p>Prompt-n-Post uses OpenAI technology to generate social media content. AI-generated outputs may occasionally contain inaccuracies or unintended language. You agree to review all generated content before publishing and accept responsibility for its use.</p>
+
+        <h4 class="mt-4">9. Service Availability</h4>
+        <p>We strive to maintain uptime and functionality, but the Service may occasionally be unavailable due to maintenance or technical issues. We are not liable for downtime, data loss, or delays caused by third-party providers (e.g., OpenAI, Stripe, SendGrid).</p>
+
+        <h4 class="mt-4">10. Limitation of Liability</h4>
+        <p>To the fullest extent permitted by law, Prompt-n-Post and its affiliates, partners, and employees shall not be liable for any indirect, incidental, special, or consequential damages resulting from your use of the Service, including loss of data, revenue, or profits.</p>
+
+        <h4 class="mt-4">11. Termination</h4>
+        <p>We may suspend or terminate your account if we believe you have violated these Terms or misused the Service. Upon termination, your right to use the Service ends immediately. You may cancel your subscription at any time to prevent future billing.</p>
+
+        <h4 class="mt-4">12. Changes to These Terms</h4>
+        <p>We may update these Terms periodically. The latest version will always be posted on this page. Continued use of the Service after changes take effect constitutes acceptance of the new Terms.</p>
+
+        <h4 class="mt-4">13. Contact</h4>
+        <p>If you have questions about these Terms, please contact us at:</p>
+        <p>
+            <strong>Email:</strong> admin@prompt-n-post.com<br />
+            <strong>Address:</strong> Knoxville, TN, USA
+        </p>
+
+        <p class="mt-5 text-secondary small">© @DateTime.UtcNow.Year Prompt-n-Post. All rights reserved.</p>
+    </div>
+</section>
