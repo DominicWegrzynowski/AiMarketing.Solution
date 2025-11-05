@@ -38,6 +38,11 @@
           // Restore readonly
           input.setAttribute("readonly", "");
           window.getSelection().removeAllRanges();
+
+          //ADDED 11/5 : Show msg
+          const icon = document.getElementById("copyIcon");
+           icon.classList.replace("bi-copy", "bi-check2");
+           setTimeout(() => icon.classList.replace("bi-check2", "bi-copy"), 2000);
         }
 
         function resizeAllTextareas() {

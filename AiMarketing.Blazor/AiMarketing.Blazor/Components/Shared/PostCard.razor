@@ -32,36 +32,6 @@
         }
     }
 
-    // private async Task CopyToClipboard()
-    // {
-    //     try
-    //     {
-    //         bool isIOS = await JS.InvokeAsync<bool>("isIOS");
-
-    //         if (isIOS)
-    //         {
-    //             // Direct copy for Safari/iOS
-    //             await JS.InvokeVoidAsync("directCopy", Post.Content);
-    //             copySuccess = true;
-    //         }
-    //         else
-    //         {
-    //             // Standard async clipboard API
-    //             bool success = await JS.InvokeAsync<bool>("copyToClipboard", Post.Content);
-    //             copySuccess = success;
-    //         }
-
-    //         StateHasChanged();
-    //         await Task.Delay(2000);
-    //         copySuccess = false;
-    //         StateHasChanged();
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Clipboard error: {ex.Message}");
-    //     }
-    // }
-
     private async Task ShowCopiedFeedback()
     {
         copySuccess = true;
@@ -91,11 +61,6 @@
         else
         {
             <div class="flex-grow-1">
-                @* <textarea style="background:none; border:none; display:block; height: fit-content;" id="copy_@Post.Id"
-                      class="form-control flex-grow-1"
-                      type="text"
-                      value="@Post.Content"
-                      readonly>@Post.Content</textarea> *@
                 <textarea readonly
                       type="text"
                       value="@Post.Content"
@@ -126,14 +91,15 @@
                     <button class="btn btn-warning" title="Edit post" @onclick="StartEdit">
                         <i class="bi bi-pencil-square"></i>
                     </button>
-                    <div class="input-group mb-2">
+                    <!--removed mb-2 -->
+                    <div class="input-group">
                         <button class="btn btn-success"
                                 type="button"
                                 onclick="copyIOSSafe('copy_@Post.Id')">
-                            <i class="bi bi-copy"></i>
+                            <i id="copyIcon" class="bi bi-copy"></i>
+                            <!--id="copyIcon added-->
                         </button>
                     </div>
-
                 </div>
 
                 <!-- separator only on md+ -->
