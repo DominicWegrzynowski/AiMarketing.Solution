@@ -188,7 +188,24 @@ namespace AiMarketing.Blazor.Services.BillingService
             });
 
             var active = subs.Data.FirstOrDefault();
-            if (active is null) return;
+            if (active is null)
+            {
+
+                user.StripeSubscriptionId = null;
+                user.SubscriptionStatus = null;
+                user.CurrentPeriodStartUtc = null;
+                user.CurrentPeriodEndUtc = null;
+                user.SubscriptionTier = UserRole.Trial;
+
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (currentRoles.Any())
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                await _userManager.AddToRoleAsync(user, UserRole.Trial.ToString());
+
+                await _userManager.UpdateAsync(user);
+                await _context.SaveChangesAsync();
+                return;
+            }
 
             user.StripeSubscriptionId = active.Id;
             user.SubscriptionStatus = active.Status;

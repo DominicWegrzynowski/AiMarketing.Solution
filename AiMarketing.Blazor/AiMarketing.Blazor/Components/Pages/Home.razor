@@ -27,9 +27,17 @@
                         <p><strong>Posts Left This Month:</strong> @postsRemaining</p>
                         <p><strong>Next Cycle Begins:</strong> @nextCycleDate.ToString()</p>
                         
-                        <button class="btn btn-outline-secondary btn-sm mt-2" @onclick='() => _navigationManager.NavigateTo("manage-membership")'>
+                        <button class="btn btn-outline-secondary btn-sm mt-2" @onclick=' async () => await Redirecting()'>
                             Manage Membership
                         </button>
+                        @if (isRedirecting)
+                        {
+                            <div class="d-flex justify-content-center mt-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        }
                     </div>
 
                     <div class="mb-3">
@@ -114,6 +122,7 @@
     private int numberOfPosts = 1;
     private bool isLoading = false;
     private DateTime? nextCycleDate;
+    private bool isRedirecting = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -129,10 +138,15 @@
         currentUser = user;
 
         var roles = await _userManager.GetRolesAsync(currentUser);
-        currentRole = roles.FirstOrDefault() ?? UserRole.Trial.ToString();
+        currentRole = user.SubscriptionTier.ToString() ?? UserRole.Trial.ToString();
 
         // await _billingService.CheckAndHandleSubscriptionExpirationAsync(user);
         // await _allowanceService.RefreshAllowanceIfNeededAsync(currentUser);
+
+
+        await _billingService.SyncSubscriptionFromStripe(currentUser);
+
+
         postsRemaining = Math.Max(0, currentUser.MonthlyPostAllowance - currentUser.PostsUsedThisPeriod);
 
         nextCycleDate = currentUser.CurrentPeriodEndUtc;
@@ -226,5 +240,11 @@
     private async Task ScrollToTop()
     {
         await js.InvokeVoidAsync("scrollToTop");
+    }
+
+    private async Task Redirecting()
+    {
+        isRedirecting = true;
+        _navigationManager.NavigateTo("manage-membership");
     }
 }

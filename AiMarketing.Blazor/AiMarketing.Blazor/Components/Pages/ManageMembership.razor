@@ -152,13 +152,6 @@ else
         if (user == null) return;
         currentUser = user;
 
-        //Check with stripe first, dont rely on stale db
-        if (!string.IsNullOrEmpty(currentUser.StripeCustomerId) &&
-             string.IsNullOrEmpty(currentUser.StripeSubscriptionId))
-        {
-            Console.WriteLine("SyncSubscriptionFromStripe Called");
-            await _billingService.SyncSubscriptionFromStripe(currentUser);
-        }
 
         if (!string.IsNullOrEmpty(currentUser.StripeCustomerId) && !string.IsNullOrEmpty(currentUser.StripeSubscriptionId))
         {
