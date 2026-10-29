@@ -1,81 +1,105 @@
 # Prompt-n-Post
 
-**AI-powered marketing content generation for small businesses.**
+**AI-powered social media marketing SaaS built with Blazor and ASP.NET Core Web API.**
 
-[Live Website](https://prompt-n-post.com/) | [Developer Portfolio](https://dominicwegrzynowski.dev)
+[Live Application](https://prompt-n-post.com/) | [Developer Portfolio](https://dominicwegrzynowski.dev)
 
 ## Overview
 
-Prompt-n-Post is a full-stack SaaS application I developed to help small businesses generate personalized social media marketing content using artificial intelligence.
+Prompt-n-Post is a full-stack SaaS application designed to help small businesses generate personalized marketing content using artificial intelligence.
 
-Users provide information about their business through a form, and the application uses the **OpenAI API** to generate marketing content based on that input.
+The application uses **Blazor** for its user interface and **ASP.NET Core Web API** for backend functionality, integrating the **OpenAI API** for content generation and **Stripe** for subscription billing.
 
-The platform also integrates **Stripe** to manage paid subscriptions, combining AI-powered functionality with a subscription-based business model.
+Users enter information about their business through a form, which is used to construct requests to OpenAI's API and generate marketing content tailored to their business.
 
-This project was built independently as an opportunity to develop a complete, publicly accessible software product.
+I developed Prompt-n-Post independently to explore full-stack .NET development, generative AI integration, and subscription-based SaaS architecture.
+
+## Tech Stack
+
+| Component | Technology |
+|---|---|
+| Frontend | Blazor |
+| Backend | C#, ASP.NET Core Web API |
+| AI Integration | OpenAI API |
+| Subscription Billing | Stripe |
+| Architecture | Full-stack .NET, API-based integration |
 
 ## Key Features
 
-### AI-Powered Content Generation
-- Integrates with the OpenAI API to generate marketing content.
-- Accepts user input describing a business and its marketing needs.
-- Uses business-specific information to generate personalized social media posts.
-- Allows users to review generated content before using it.
+### AI-Powered Marketing Content
+- Generates personalized marketing content using the OpenAI API.
+- Accepts business-specific information through a structured input form.
+- Uses the submitted information to provide context for AI-generated content.
+- Presents generated content for user review.
 
-### Subscription Management
-- Integrates Stripe for subscription billing.
-- Supports paid subscription plans.
-- Provides a subscription-based model for accessing the application's services.
+### Subscription Billing
+- Integrates Stripe for paid subscriptions.
+- Supports a subscription-based SaaS business model.
+- Incorporates payment processing into the application experience.
 
-### Business-Focused User Experience
-- Form-based interface for submitting business information.
-- Simplified content generation workflow.
-- Designed to make AI-assisted marketing accessible to small-business owners.
+### Business-Focused Interface
+- Blazor-based frontend for collecting business information.
+- Straightforward content generation workflow.
+- Designed for small-business owners seeking assistance with social media marketing.
+
+## Application Architecture
+
+The application separates its user interface, backend services, and external integrations.
+
+```text
+┌────────────────────────────┐
+│       Blazor Frontend      │
+│ Business Information Form  │
+└─────────────┬──────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│    ASP.NET Core Web API    │
+│   Application Logic        │
+└─────────────┬──────────────┘
+              │
+       ┌──────┴───────┐
+       ▼              ▼
+┌──────────────┐ ┌──────────────┐
+│  OpenAI API  │ │  Stripe API  │
+│  Marketing   │ │ Subscription │
+│  Generation  │ │   Billing    │
+└──────────────┘ └──────────────┘
+```
 
 ## How It Works
 
-1. **Business Input** — The user enters information about their business through a form.
-2. **AI Integration** — The application submits the relevant information to the OpenAI API.
-3. **Content Generation** — OpenAI generates marketing content tailored to the business.
-4. **Review** — The user reviews the generated content for use in their marketing.
-5. **Subscription Billing** — Stripe handles paid subscriptions to the platform.
-
-## Third-Party Integrations
-
-| Service | Purpose |
-|---|---|
-| OpenAI API | AI-powered marketing content generation |
-| Stripe | Subscription billing and payment processing |
+1. **Enter Business Information** — Users provide details about their business through a Blazor form.
+2. **Submit Generation Request** — The application sends the relevant input through its backend API.
+3. **Generate Content** — The backend integrates with the OpenAI API to request personalized marketing content.
+4. **Review Results** — Generated content is returned to the application for the user to review.
+5. **Manage Subscriptions** — Stripe provides subscription billing functionality for paid access.
 
 ## Engineering Highlights
 
-Building Prompt-n-Post involved developing an application that connects user-facing functionality with external services.
+Prompt-n-Post demonstrates practical experience with:
 
-Key engineering areas include:
-
-- Integrating a generative AI API into an application workflow.
-- Transforming structured form input into requests for AI-generated content.
-- Handling external API requests and responses.
-- Integrating Stripe for recurring subscription billing.
-- Designing a user-facing workflow around a practical business problem.
-- Building and deploying an independent SaaS application.
+- Developing a full-stack application using C# and .NET.
+- Building interactive interfaces with Blazor.
+- Implementing backend functionality with ASP.NET Core Web API.
+- Integrating external REST APIs into application workflows.
+- Using generative AI to solve a business-oriented problem.
+- Integrating Stripe for subscription billing.
+- Developing and deploying a publicly accessible SaaS product.
 
 ## Live Application
 
-**Website:** https://prompt-n-post.com/
+**https://prompt-n-post.com/**
 
 ## Project Background
 
-Prompt-n-Post began as an independent project exploring how generative AI could simplify marketing for small businesses.
+I built Prompt-n-Post as an independent project to explore how generative AI could be applied to a practical small-business problem.
 
-The objective was to create a practical product rather than an isolated AI demonstration, incorporating both AI-generated content and the subscription infrastructure necessary for a SaaS business.
-
-The project reflects my interest in full-stack application development, third-party integrations, and building software around real-world use cases.
+The goal was to create more than a proof of concept: a usable application combining a modern .NET technology stack, AI-powered functionality, and subscription billing.
 
 ## Author
 
-**Dominic Wegrzynowski**
-
+**Dominic Wegrzynowski**  
 Full-Stack Software Developer
 
 - [Portfolio](https://dominicwegrzynowski.dev)
